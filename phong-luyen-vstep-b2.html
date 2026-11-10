@@ -1,0 +1,1328 @@
+<title>Phòng luyện VSTEP B2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Literata:opsz,wght@7..72,400;7..72,600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky skill-tab rail over one 980px workbench column; exam-paper surfaces; correct answers get a teacher's marker circle */
+:root{
+  --paper:#F3F3EE; --surface:#FFFFFF; --sunk:#EBECE5; --ink:#172036; --muted:#596178; --line:#D9DAD1;
+  --navy:#22407F; --navy-soft:#E5EBF7; --accent:#D2621A; --accent-soft:#FBE8D9;
+  --ok:#1C7A4B; --ok-soft:#DDF1E5; --bad:#B3261E; --bad-soft:#FBE4E1; --warn:#9A6400; --warn-soft:#FBF0D6;
+  --f-ui:"Be Vietnam Pro", system-ui, "Segoe UI", Roboto, sans-serif;
+  --f-read:"Literata", Georgia, "Times New Roman", serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11151D; --surface:#1A1F2A; --sunk:#151A23; --ink:#E7E9EF; --muted:#A0A7B7; --line:#2C3443;
+  --navy:#93B1F5; --navy-soft:#1E2943; --accent:#F08C48; --accent-soft:#3A2819;
+  --ok:#62C792; --ok-soft:#16301F; --bad:#F2887D; --bad-soft:#3A1D1A; --warn:#E8B85A; --warn-soft:#33290F;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#11151D; --surface:#1A1F2A; --sunk:#151A23; --ink:#E7E9EF; --muted:#A0A7B7; --line:#2C3443;
+  --navy:#93B1F5; --navy-soft:#1E2943; --accent:#F08C48; --accent-soft:#3A2819;
+  --ok:#62C792; --ok-soft:#16301F; --bad:#F2887D; --bad-soft:#3A1D1A; --warn:#E8B85A; --warn-soft:#33290F;
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important} /* also when the file is opened directly, outside the artifact skeleton */
+body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{text-wrap:balance;margin:0;line-height:1.25}
+h2{font-size:1.45rem;font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.08rem;font-weight:700}
+h4{font-size:.95rem;font-weight:700}
+p{margin:0}
+a{color:var(--navy)}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header + tabs */
+.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;padding-block:14px 10px}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand h1{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
+.brand .lvl{font-family:var(--f-mono);font-weight:600;font-size:.8rem;color:var(--accent);border:1.5px solid var(--accent);border-radius:999px;padding:1px 8px;transform:rotate(-3deg);display:inline-block}
+.top .src{font-size:.8rem;color:var(--muted)}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.tabs button{flex:none;background:none;border:0;padding:11px 12px 9px;font-weight:600;font-size:.92rem;color:var(--muted);border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tabs button:hover{color:var(--ink)}
+main{padding-block:22px 64px}
+.view{display:flex;flex-direction:column;gap:18px}
+
+/* shared */
+.sec-head{display:flex;flex-direction:column;gap:6px}
+.lede{color:var(--muted);max-width:68ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.card.flat{background:transparent;border-style:dashed}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.between{justify-content:space-between}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.grid2>*,.grid3>*{min-width:0}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 13px;font-weight:600;font-size:.9rem;cursor:pointer}
+.btn:hover{border-color:var(--navy)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--navy)}
+.chip{display:inline-flex;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.85rem;font-weight:600;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--navy-soft);color:var(--navy)}
+.tag.ctu{background:var(--accent-soft);color:var(--accent)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+select,input[type=text],input[type=date],input[type=number],textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+textarea{width:100%;resize:vertical;line-height:1.6}
+details>summary{cursor:pointer;font-weight:600;color:var(--navy)}
+details[open]>summary{margin-bottom:8px}
+ul.clean{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:.88rem}
+.note b{color:var(--warn)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* score scale */
+.scale{position:relative;height:38px;margin-top:6px}
+.scale .bar{position:absolute;inset:12px 0 auto;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--sunk) 0 40%,var(--navy-soft) 40% 60%,var(--accent-soft) 60% 85%,var(--ok-soft) 85% 100%);border:1px solid var(--line)}
+.scale .tick{position:absolute;top:0;font-family:var(--f-mono);font-size:.72rem;color:var(--muted);transform:translateX(-50%)}
+.scale .tick::after{content:"";display:block;width:1px;height:26px;background:var(--line);margin:2px auto 0}
+.scale .lab{position:absolute;bottom:-4px;font-size:.72rem;font-weight:700;transform:translateX(-50%)}
+.target-line{position:absolute;top:6px;height:22px;width:2px;background:var(--accent);left:60%}
+
+/* stats */
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat .v{font-family:var(--f-mono);font-size:1.4rem;font-weight:600;font-variant-numeric:tabular-nums}
+.stat .k{font-size:.82rem;color:var(--muted)}
+.meter{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;background:var(--navy)}
+
+/* options with marker circle */
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.opt:hover{border-color:var(--navy)}
+.opt .L{flex:none;width:24px;height:24px;display:grid;place-items:center;font-weight:700;font-size:.85rem;border-radius:50%}
+.opt.sel{border-color:var(--navy);background:var(--navy-soft)}
+.opt.correct{border-color:var(--ok);background:var(--ok-soft)}
+.opt.correct .L{box-shadow:0 0 0 2px var(--accent);transform:rotate(-8deg) scale(1.1);color:var(--accent)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt[disabled]{cursor:default}
+.opt.picked::after{margin-left:auto;padding-left:10px;font-weight:800;font-size:1.05rem;line-height:24px}
+.opt.correct.picked::after{content:"✓";color:var(--ok)}
+.opt.wrong.picked::after{content:"✗";color:var(--bad)}
+.fb{font-size:.88rem;padding:8px 10px;border-radius:8px}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.bad{background:var(--bad-soft);color:var(--bad)}
+.fb.info{background:var(--navy-soft);color:var(--ink)}
+
+/* listening */
+.dots{display:flex;flex-wrap:wrap;gap:6px}
+.dot{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-mono);font-weight:600;cursor:pointer}
+.dot[aria-current="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.dot.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.dot.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.player{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--sunk);border-radius:8px;padding:10px 12px}
+.wave{display:inline-flex;gap:3px;align-items:flex-end;height:18px}
+.wave i{width:3px;background:var(--navy);border-radius:2px;height:4px}
+.wave.on i{animation:w 0.9s ease-in-out infinite}
+.wave.on i:nth-child(2){animation-delay:.15s}.wave.on i:nth-child(3){animation-delay:.3s}.wave.on i:nth-child(4){animation-delay:.45s}
+@keyframes w{0%,100%{height:4px}50%{height:18px}}
+@media (prefers-reduced-motion:reduce){.wave.on i{animation:none;height:12px}}
+.bank{display:flex;flex-wrap:wrap;gap:6px}
+.bank span{font-size:.85rem;padding:2px 9px;border:1px dashed var(--line);border-radius:6px;background:var(--surface)}
+.gap-text{font-family:var(--f-read);font-size:1.02rem;line-height:2.1}
+.gap-text select{font-family:var(--f-ui);font-size:.88rem;padding:2px 6px;margin:0 2px;max-width:100%}
+.gap-text select.ok{border-color:var(--ok);background:var(--ok-soft)}
+.gap-text select.bad{border-color:var(--bad);background:var(--bad-soft)}
+.transcript{font-family:var(--f-read);line-height:1.8;background:var(--sunk);border-radius:8px;padding:12px 14px}
+.transcript b{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+
+/* reading */
+.plist{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
+.pitem{text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.pitem:hover{border-color:var(--navy)}
+.pitem .best{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.read-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.read-grid{grid-template-columns:1fr}}
+.passage{font-family:var(--f-read);font-size:1.02rem;line-height:1.75;display:flex;flex-direction:column;gap:12px}
+.passage b{background:var(--accent-soft);padding:0 2px;border-radius:2px}
+@media (min-width:821px){.passage-card{position:sticky;top:60px;max-height:calc(100vh - 80px);overflow:auto}}
+.q{display:flex;flex-direction:column;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.q:last-child{border-bottom:0}
+.q .qt{font-weight:600}
+.why{font-size:.86rem;color:var(--muted);border-left:3px solid var(--accent);padding-left:10px}
+
+/* writing */
+.subtabs{display:flex;flex-wrap:wrap;gap:6px}
+.editor-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-size:.88rem}
+.wc{font-family:var(--f-mono);font-weight:600}
+.wc.low{color:var(--bad)} .wc.good{color:var(--ok)}
+.clock{font-family:var(--f-mono);font-weight:600;font-size:1.05rem;font-variant-numeric:tabular-nums;padding:2px 8px;border-radius:6px;background:var(--sunk)}
+.clock.low{color:var(--warn);background:var(--warn-soft)}
+.clock.done{color:var(--bad);background:var(--bad-soft)}
+.prompt{font-family:var(--f-read);font-size:1.02rem;line-height:1.7;background:var(--sunk);border-left:3px solid var(--navy);border-radius:0 8px 8px 0;padding:12px 14px}
+.tmpl{font-family:var(--f-mono);font-size:.84rem;line-height:1.7;white-space:pre-wrap;background:var(--sunk);border-radius:8px;padding:12px}
+.cls-item{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.cls-item:last-child{border-bottom:0}
+.cls-item .txt{flex:1 1 260px;min-width:0}
+
+/* AI result */
+.ai-box{display:none}
+body.has-ai .ai-box{display:block}
+.ai-off{display:none}
+body.no-ai .ai-off{display:block}
+.grade-head{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.grade-score{font-family:var(--f-mono);font-size:2.2rem;font-weight:600;line-height:1}
+.crit{display:grid;grid-template-columns:minmax(0,150px) 44px minmax(0,1fr);gap:4px 12px;align-items:start;font-size:.9rem;padding:6px 0;border-bottom:1px solid var(--line)}
+.crit .s{font-family:var(--f-mono);font-weight:600}
+@media (max-width:560px){.crit{grid-template-columns:1fr 44px}.crit .c{grid-column:1/-1}}
+.err-row{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.err-row .o{text-decoration:line-through;color:var(--bad)}
+.err-row .f{color:var(--ok);font-weight:600}
+.improved{font-family:var(--f-read);white-space:pre-wrap;line-height:1.7;background:var(--sunk);border-radius:8px;padding:12px}
+
+/* speaking */
+.mind{display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:auto auto auto;gap:10px;align-items:center;justify-items:center;padding:8px 0}
+.mind .center{grid-column:2;grid-row:2;background:var(--navy);color:var(--surface);border-radius:12px;padding:12px 16px;font-weight:700;text-align:center;max-width:260px}
+.mind .n{border:1.5px solid var(--navy);border-radius:999px;padding:6px 14px;font-size:.88rem;text-align:center;background:var(--surface);max-width:220px}
+.mind .n.you{border-style:dashed;color:var(--muted)}
+.mind .n1{grid-column:1/4;grid-row:1}.mind .n2{grid-column:1;grid-row:2}.mind .n3{grid-column:3;grid-row:2}.mind .n4{grid-column:1/4;grid-row:3}
+@media (max-width:560px){.mind{grid-template-columns:1fr}.mind .center,.mind .n1,.mind .n2,.mind .n3,.mind .n4{grid-column:1;grid-row:auto}}
+.ql{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.ql li{display:flex;gap:8px;align-items:flex-start}
+.ql li .t{flex:1;min-width:0}
+.speak-btn{flex:none;padding:3px 9px;font-size:.8rem}
+.phase{font-weight:700;font-size:.85rem}
+
+/* vocab */
+.flash{min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;cursor:pointer;user-select:none}
+.flash .w{font-family:var(--f-read);font-size:2rem;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.flash .m{font-size:1.15rem;color:var(--navy);font-weight:600}
+.flash .hint{font-size:.8rem;color:var(--muted)}
+.flash.known{box-shadow:inset 0 0 0 2px var(--ok)}
+.prog{font-family:var(--f-mono);font-size:.85rem;color:var(--muted)}
+.wordlist{columns:2 240px;column-gap:24px;font-size:.88rem}
+.wordlist div{break-inside:avoid;padding:3px 0;border-bottom:1px dotted var(--line)}
+.wordlist div.k{color:var(--muted)}
+.wordlist b{font-weight:600}
+
+/* grammar */
+.gq{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--line)}
+.gq:last-child{border-bottom:0}
+.gq .opts{flex-direction:row;flex-wrap:wrap}
+.gq .opt{width:auto;padding:5px 12px}
+.gq input[type=text]{min-width:0;flex:1 1 180px}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><h1>Phòng luyện VSTEP</h1><span class="lvl">B2 · 6.0+</span></div>
+    <p class="src">Bám theo giáo trình tuần 1, Trung tâm Ngoại ngữ ĐH Cần Thơ · bài luyện do Claude soạn</p>
+  </div>
+</header>
+<nav class="tabs" aria-label="Kỹ năng">
+  <div class="wrap" role="tablist">
+    <button data-v="tong-quan" role="tab">Tổng quan</button>
+    <button data-v="nghe" role="tab">Nghe</button>
+    <button data-v="doc" role="tab">Đọc</button>
+    <button data-v="viet" role="tab">Viết</button>
+    <button data-v="noi" role="tab">Nói</button>
+    <button data-v="tu-vung" role="tab">Từ vựng</button>
+    <button data-v="ngu-phap" role="tab">Ngữ pháp</button>
+  </div>
+</nav>
+<main class="wrap">
+  <section class="view" id="v-tong-quan"></section>
+  <section class="view" id="v-nghe" hidden></section>
+  <section class="view" id="v-doc" hidden></section>
+  <section class="view" id="v-viet" hidden></section>
+  <section class="view" id="v-noi" hidden></section>
+  <section class="view" id="v-tu-vung" hidden></section>
+  <section class="view" id="v-ngu-phap" hidden></section>
+</main>
+
+<script>
+/* ---------------- helpers ---------------- */
+const $ = (s, r = document) => r.querySelector(s);
+function el(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === false || v == null) continue;
+    if (k === "class") e.className = v;
+    else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return e;
+}
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const LETTERS = ["A", "B", "C", "D", "E"];
+const words = t => (t.trim().match(/\S+/g) || []).length;
+function rich(s, tag = "p") { // **bold** markup
+  const p = el(tag);
+  s.split("**").forEach((part, i) => { if (part) p.append(i % 2 ? el("b", { text: part }) : document.createTextNode(part)); });
+  return p;
+}
+
+/* ---------------- storage (per-viewer convenience) ---------------- */
+const STORE_KEY = "vstep-b2-v1";
+let S = { listen: {}, read: {}, known: {}, drafts: {}, gram: {}, days: [], examDate: "" };
+try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) {} }
+function markDay() { const d = new Date().toISOString().slice(0, 10); if (!S.days.includes(d)) { S.days.push(d); save(); } }
+
+/* ---------------- text to speech ---------------- */
+const TTS = {
+  voice: null, rate: 0.95,
+  ok() { return "speechSynthesis" in window; },
+  init() {
+    if (!this.ok()) return;
+    const pick = () => {
+      const vs = speechSynthesis.getVoices();
+      this.voice = vs.find(v => /en-US/i.test(v.lang) && /Natural|Google|Microsoft/i.test(v.name)) || vs.find(v => /^en[-_]/i.test(v.lang)) || null;
+    };
+    pick(); speechSynthesis.onvoiceschanged = pick;
+  },
+  speak(text, onend) {
+    if (!this.ok()) { onend && onend(); return false; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US"; if (this.voice) u.voice = this.voice; u.rate = this.rate;
+    u.onend = () => onend && onend(); u.onerror = () => onend && onend();
+    speechSynthesis.speak(u); return true;
+  },
+  stop() { if (this.ok()) speechSynthesis.cancel(); }
+};
+TTS.init();
+
+/* ---------------- timer ---------------- */
+function Timer() {
+  const d = el("span", { class: "clock", text: "--:--" });
+  let id = null, left = 0, onDone = null;
+  const fmt = s => (s < 0 ? "+" : "") + String(Math.floor(Math.abs(s) / 60)).padStart(2, "0") + ":" + String(Math.abs(s) % 60).padStart(2, "0");
+  function tick() {
+    left--; d.textContent = fmt(left);
+    d.classList.toggle("low", left <= 30 && left > 0);
+    if (left === 0) { d.classList.add("done"); const f = onDone; onDone = null; f && f(); }
+  }
+  return {
+    el: d,
+    start(sec, cb) { clearInterval(id); left = sec; onDone = cb; d.classList.remove("done", "low"); d.textContent = fmt(left); id = setInterval(tick, 1000); },
+    stop() { clearInterval(id); id = null; },
+    reset() { clearInterval(id); id = null; d.classList.remove("done", "low"); d.textContent = "--:--"; }
+  };
+}
+
+/* ---------------- Claude (sample capability) ---------------- */
+let SAMPLE = null;
+(async () => {
+  try { if (window.claude && window.claude.use) SAMPLE = await window.claude.use("sample"); } catch (e) { SAMPLE = null; }
+  document.body.classList.add(SAMPLE ? "has-ai" : "no-ai");
+})();
+function aiErr(e) {
+  const c = e && e.code;
+  if (c === "not_granted" || c === "sampling_disabled" || c === "not_declared" || c === "capability_disabled") {
+    document.body.classList.remove("has-ai"); document.body.classList.add("no-ai");
+  }
+  return ({
+    not_granted: "Bạn chưa cho phép trang này dùng Claude nên chưa chấm được. Bật lại trong mục Quyền (Permissions) của trang rồi tải lại.",
+    sampling_disabled: "Tài khoản này chưa bật tính năng gọi Claude từ trang.",
+    rate_limited: "Bạn vừa gửi nhiều yêu cầu liên tiếp. Đợi một lúc rồi bấm chấm lại.",
+    invalid_json: "Kết quả trả về bị lỗi định dạng. Bấm chấm lại.",
+    session_expired: "Phiên đăng nhập đã hết hạn. Đăng nhập lại rồi thử lại.",
+    prompt_too_large: "Bài quá dài để gửi một lần. Rút ngắn rồi thử lại.",
+    refused: "Claude không chấm được nội dung này. Kiểm tra lại bài viết.",
+    cancelled: "Đã dừng chấm."
+  })[c] || "Không kết nối được tới Claude. Bấm chấm lại sau ít phút.";
+}
+function gradePrompt(kind, task, promptText, text) {
+  const n = words(text);
+  const head = kind === "write"
+    ? `Bạn là giám khảo chấm thi Viết VSTEP (bậc 3–5, khung năng lực ngoại ngữ 6 bậc dùng cho Việt Nam). Chấm nghiêm túc, sát thực tế phòng thi.\n\nLOẠI BÀI: ${task === 1 ? "Task 1 – viết thư/email, tối thiểu 120 từ, chiếm 1/3 điểm Viết" : "Task 2 – bài luận, tối thiểu 250 từ, chiếm 2/3 điểm Viết"}\nĐỀ BÀI: ${promptText}\nSỐ TỪ: ${n}\n\nBÀI LÀM:\n"""\n${text}\n"""\n\nChấm theo 4 tiêu chí, mỗi tiêu chí thang 0–10: Hoàn thành yêu cầu đề; Tổ chức & liên kết; Từ vựng; Ngữ pháp. Bài thiếu số từ tối thiểu phải bị trừ điểm ở tiêu chí Hoàn thành yêu cầu.`
+    : `Bạn là giám khảo chấm thi Nói VSTEP (bậc 3–5). Người học đã nói và tự chép lại lời nói thành văn bản. Chấm dựa trên bản chép này; không chấm phát âm vì không nghe được giọng.\n\nPHẦN THI: ${task}\nĐỀ: ${promptText}\nSỐ TỪ: ${n}\n\nBẢN CHÉP LỜI NÓI:\n"""\n${text}\n"""\n\nChấm theo 4 tiêu chí, mỗi tiêu chí thang 0–10: Ngữ pháp; Từ vựng; Độ trôi chảy & mạch lạc (đánh giá qua độ dài, từ nối, cách triển khai); Nội dung & phát triển ý (trả lời đúng trọng tâm, có lý do, ví dụ).`;
+  const names = kind === "write" ? ["Hoàn thành yêu cầu", "Tổ chức & liên kết", "Từ vựng", "Ngữ pháp"] : ["Ngữ pháp", "Từ vựng", "Trôi chảy & mạch lạc", "Nội dung & phát triển ý"];
+  return head + `\nĐiểm tổng là trung bình 4 tiêu chí, làm tròn đến 0.5. Quy đổi: dưới 4.0 = Dưới B1; 4.0–5.5 = B1; 6.0–8.0 = B2; 8.5–10 = C1.\n\nTrả lời CHỈ bằng một đối tượng JSON đúng dạng sau. Nhận xét viết bằng tiếng Việt, câu tiếng Anh giữ nguyên tiếng Anh:\n{"overall": 5.5, "level": "B1", "criteria": [${names.map(x => `{"name": "${x}", "score": 5, "comment": "..."}`).join(", ")}], "strengths": ["..."], "errors": [{"original": "đoạn sai trích từ bài", "fix": "cách sửa", "note": "giải thích ngắn"}], "upgrades": [{"from": "cách diễn đạt đơn giản trong bài", "to": "cách diễn đạt mức B2"}], "improved": "${kind === "write" ? "bài viết lại hoàn chỉnh ở mức B2, giữ ý chính của người viết" : "câu trả lời mẫu mức B2 dựa trên ý của người học"}"}\nTối đa 8 lỗi và 5 gợi ý nâng cấp.`;
+}
+function renderGrade(out, r) {
+  out.replaceChildren();
+  const num = x => (typeof x === "number" && isFinite(x)) ? x : parseFloat(x);
+  const ov = num(r && r.overall);
+  out.append(el("div", { class: "grade-head" },
+    el("span", { class: "grade-score", text: isFinite(ov) ? ov.toFixed(1) : "–" }),
+    el("div", { class: "stack", style: "gap:2px" }, el("span", { class: "tag " + (ov >= 6 ? "ok" : "ctu"), text: String((r && r.level) || "") }), el("span", { class: "small muted", text: ov >= 6 ? "Đạt ngưỡng B2" : "Chưa đạt 6.0 – xem lỗi bên dưới" }))));
+  const crit = Array.isArray(r && r.criteria) ? r.criteria : [];
+  if (crit.length) {
+    const box = el("div", { style: "margin-top:10px" });
+    crit.forEach(c => box.append(el("div", { class: "crit" }, el("b", { text: String(c.name || "") }), el("span", { class: "s", text: String(c.score ?? "") }), el("span", { class: "c", text: String(c.comment || "") }))));
+    out.append(box);
+  }
+  if (Array.isArray(r.strengths) && r.strengths.length) out.append(el("h4", { text: "Điểm mạnh", style: "margin-top:14px" }), el("ul", { class: "clean" }, r.strengths.map(s => el("li", { text: String(s) }))));
+  if (Array.isArray(r.errors) && r.errors.length) {
+    out.append(el("h4", { text: "Lỗi cần sửa", style: "margin-top:14px" }));
+    r.errors.forEach(e => out.append(el("div", { class: "err-row" }, el("span", { class: "o", text: String(e.original || "") }), el("span", { class: "f", text: "→ " + String(e.fix || "") }), e.note ? el("span", { class: "muted small", text: String(e.note) }) : null)));
+  }
+  if (Array.isArray(r.upgrades) && r.upgrades.length) {
+    out.append(el("h4", { text: "Nâng cấp lên B2", style: "margin-top:14px" }));
+    out.append(el("ul", { class: "clean" }, r.upgrades.map(u => el("li", {}, el("span", { class: "muted", text: String(u.from || "") }), " → ", el("b", { text: String(u.to || "") })))));
+  }
+  if (r.improved) {
+    const pre = el("div", { class: "improved", text: String(r.improved) });
+    const copy = el("button", { class: "btn ghost small", text: "Chép bài mẫu", onclick: async () => { try { await navigator.clipboard.writeText(String(r.improved)); copy.textContent = "Đã chép"; } catch (e) { const s = getSelection(); const rg = document.createRange(); rg.selectNodeContents(pre); s.removeAllRanges(); s.addRange(rg); copy.textContent = "Đã bôi đen, nhấn Ctrl+C"; } } });
+    out.append(el("details", { style: "margin-top:14px" }, el("summary", { text: "Xem bản viết lại mức B2" }), pre, copy));
+  }
+}
+function aiPanel(kind, getTask, getPrompt, getText) {
+  const out = el("div", { class: "stack", style: "margin-top:10px" });
+  let ctl = null;
+  const stop = el("button", { class: "btn", text: "Dừng", hidden: true, onclick: () => ctl && ctl.abort() });
+  const btn = el("button", { class: "btn accent", text: kind === "write" ? "Nhờ Claude chấm bài" : "Nhờ Claude nhận xét", onclick: async () => {
+    const text = getText();
+    if (words(text) < 20) { out.replaceChildren(el("p", { class: "fb bad", text: "Bài cần ít nhất 20 từ để chấm." })); return; }
+    if (!SAMPLE) return;
+    btn.disabled = true; stop.hidden = false; ctl = new AbortController();
+    out.replaceChildren(el("p", { class: "fb info", text: "Claude đang chấm… thường mất 20–60 giây." }));
+    try {
+      const r = await SAMPLE.json(gradePrompt(kind, getTask(), getPrompt(), text), { signal: ctl.signal });
+      renderGrade(out, r || {}); markDay();
+    } catch (e) { out.replaceChildren(el("p", { class: "fb bad", text: aiErr(e) })); }
+    finally { btn.disabled = false; stop.hidden = true; }
+  } });
+  return el("div", {},
+    el("div", { class: "ai-box" }, el("div", { class: "row" }, btn, stop, el("span", { class: "small muted", text: "Chấm theo 4 tiêu chí VSTEP, dùng lượt Claude của bạn." })), out),
+    el("p", { class: "ai-off note", text: "Chấm tự động chỉ chạy khi mở trang này trong Claude. Bạn vẫn luyện, đếm từ và bấm giờ bình thường; có thể dán bài vào khung chat với Claude để được chấm." }));
+}
+
+/* =========================================================
+   DATA – bài luyện do Claude soạn, bám chủ đề & dạng bài tuần 1
+   ========================================================= */
+const LISTEN = [
+  { name: "Bộ 1", items: [
+    { text: "Hello, this is Mai from Riverside Dental Clinic. I'm calling to [confirm] your [appointment] for a routine [checkup] on Tuesday, March 4th at 9:30. Because this is your first [visit], please arrive fifteen minutes early to fill in a short form. If you need to change the time, please [contact] us at least one day in [advance]. Thank you.",
+      extra: ["annual", "schedule", "medical"], q: "What is the main purpose of the call?", o: ["To cancel a checkup", "To confirm an appointment", "To ask for a payment", "To recommend a new doctor"], a: 1 },
+    { text: "Feeling tired after a long week? Green Leaf Spa can help you [relieve] your stress and [relax]. This month we are offering a special [package] [including] a foot massage, a herbal bath and a light lunch, all for one low [price]. [Members] also receive an extra ten percent discount.",
+      extra: ["prize", "nervous", "beverage"], q: "What is being advertised?", o: ["A restaurant", "A spa offer", "A sports club", "A travel agency"], a: 1 },
+    { text: "Good morning. I am pleased to [announce] that the city council has finally [approved] the plan to [enlarge] the central bus station. The building [contract] has been given to a local company, and work will begin in May. The city's [population] has grown [rapidly] in recent years, so a bigger station is badly needed.",
+      extra: ["runway", "industry", "traffic"], q: "According to the announcement, what will be expanded?", o: ["A train line", "A bus station", "The city hall", "An airport"], a: 1 },
+    { text: "Attention, all [employees] on the night shift. Please check the work [schedule] on the board before you start, and write your [signature] next to your name. Remember to wear your [protective] gloves and glasses at all times. Any [safety] problems must be reported to the supervisor immediately.",
+      extra: ["forgive", "production", "control"], q: "Who is this announcement probably for?", o: ["Factory workers", "Hotel guests", "Office managers", "University students"], a: 0 },
+    { text: "Hi Lan, it's Huong from the marketing [department]. Are you [free] on Friday evening? A few [colleagues] are going to a new Korean [restaurant] near the office to welcome our new manager. We'll meet [downstairs] at six. Let me know if you'd like to come!",
+      extra: ["fee", "respect", "depart"], q: "Why is Huong calling?", o: ["To book a table", "To invite a co-worker to dinner", "To introduce a new manager", "To change a meeting time"], a: 1 },
+    { text: "Thank you for calling the student services office. Our office will be closed on Thursday afternoon because we are [relocating] to Building C, on the second [floor]. We will reopen on Friday at 8 a.m. If you need urgent help, please [contact] the officer on [duty] at extension 205.",
+      extra: ["replace", "flowers", "security"], q: "What is this message mainly about?", o: ["A new security policy", "An office relocation", "A permanent closure", "Holiday opening hours"], a: 1 },
+    { text: "Good afternoon, Ms. Thao. This is Peter Lim, [manager] of the human resources department at Sunrise Hotel. We have [received] your application for the receptionist position. I was very [impressed] with your [experience] and language skills, and I would like to invite you to an [interview] next Monday at 2 p.m. Please call me back to confirm.",
+      extra: ["revise", "advertise", "meaning"], q: "Why is Peter Lim calling?", o: ["To offer Ms. Thao a job", "To arrange an interview", "To reject an application", "To ask for a new CV"], a: 1 },
+    { text: "Good evening, everyone, and welcome to our tenth [annual] staff dinner. When I started this company fifteen years ago, we had only three employees. Today we have over two hundred. I know that I could never [achieve] this [success] alone. Tonight is my chance to express my sincere [appreciation] for your hard work and for your role in the [growth] of our company.",
+      extra: ["reserve", "solve", "appropriate"], q: "Who is most likely the speaker?", o: ["A new employee", "A customer", "The founder of the company", "A journalist"], a: 2 }
+  ]},
+  { name: "Bộ 2", items: [
+    { text: "Hello, this is a [reminder] from Bright Smile [Dental] Centre about your appointment on Wednesday at 3 p.m. Since you will have two teeth [filled], please [allow] about two hours for the [visit]. Please also [bring] your medical insurance card.",
+      extra: ["full", "various", "dentist"], q: "Who is probably calling?", o: ["A hotel receptionist", "A dentist's receptionist", "A travel agent", "An insurance agent"], a: 1 },
+    { text: "[Because] the main hall is undergoing [renovations], tomorrow's training session has been moved to [conference] room 4 on the third floor. The session will still be [held] at 9 a.m., and lunch will be provided as usual.",
+      extra: ["holiday", "review", "comfortable"], q: "Why has the training session been moved?", o: ["A room is being renovated", "Too many people registered", "The trainer is ill", "Lunch is being prepared there"], a: 0 },
+    { text: "I'm afraid I have some bad news. Our [domestic] sales [dropped] by twelve percent last quarter. The weak [economy] played a part, but the [primary] reason is strong [competition] from online [retail] shops.",
+      extra: ["donate", "wrong", "complete"], q: "What is the main cause of the drop in sales?", o: ["A weak economy", "Competition from online shops", "Higher prices", "Bad weather"], a: 1 },
+    { text: "Welcome to the first ride of the cycling club this [season]. [Remember], nobody is allowed to ride with the group [unless] they wear a [helmet]. If you are [unsure] about your equipment, please talk to Minh, our safety [coordinator].",
+      extra: ["useless", "cake", "basketball"], q: "What must riders do before joining the ride?", o: ["Pay a small fee", "Wear a helmet", "Get permission from Minh", "Bring a map"], a: 1 },
+    { text: "Your [attention], please. The city [library] will close at 4 p.m. today so that staff can take an [accurate] [inventory] of the book [collection]. Borrowing will not be possible this afternoon. We [apologize] for any [inconvenience].",
+      extra: ["invitation", "liberty", "important"], q: "Why is the speaker apologizing?", o: ["Some books were lost", "A service will stop early", "Fees will increase", "The library is moving"], a: 1 },
+    { text: "Hello, Mrs. Hoa. This is Tuan from Home Style [Furniture], calling about your [recent] order. Unfortunately, two of the chairs you [requested] are out of [stock]. However, we can [offer] you a very [similar] model that can be delivered tomorrow. Please call me to let me know what you prefer.",
+      extra: ["same", "enter", "office"], q: "What is the message mainly about?", o: ["A delivery delay caused by weather", "Replacing items that are not available", "A price increase", "Cancelling the whole order"], a: 1 },
+    { text: "May I have your attention, please? Due to bad weather [conditions], all evening [flights] to Da Nang have been [cancelled]. The next flight will leave tomorrow at 7 a.m. The airline will provide hotel [accommodation] for [passengers] who need it. Thank you for your [patience].",
+      extra: ["forecast", "delay", "safety"], q: "What will be provided for the travellers?", o: ["A free meal", "A hotel room", "A full refund", "A city tour"], a: 1 },
+    { text: "Hi, this is Jenny from Quick Fix Phone [Repair]. I'm calling with an [update] on your phone. [Unfortunately], we need to [replace] the battery, which will cost about four hundred thousand dong. Please call me back to let me know if you want me to [order] a new one.",
+      extra: ["prepare", "sneakers", "older"], q: "What is the listener asked to do?", o: ["Pick up the phone today", "Call back", "Buy a new phone", "Pay online"], a: 1 }
+  ]}
+];
+
+const PASSAGES = [
+  { id: "r-traffic", title: "Getting around in Vietnamese cities", type: "Scanning · Đúng/Sai", skill: "scan",
+    paras: ["In most Vietnamese cities, the motorbike is still the main way of getting around. It is cheap to buy, easy to park and can move through narrow streets where cars cannot go. However, the situation is slowly changing.",
+      "In Hanoi and Ho Chi Minh City, the first metro lines have opened, and many office workers now take the train to avoid traffic jams during rush hour. Bus networks have also improved: many buses are newer, air-conditioned and can be tracked on a mobile app.",
+      "In smaller towns, though, public transport is still limited. Buses may run only once an hour, so most families have no choice but to rely on their motorbikes. Meanwhile, ride-hailing apps have become very popular among young people, many of whom prefer booking a ride to owning a vehicle."],
+    qs: [
+      { q: "Motorbikes are popular partly because they are easy to park.", o: ["True", "False"], a: 0, why: "Đoạn 1: “easy to park”." },
+      { q: "Both Hanoi and Ho Chi Minh City have metro lines.", o: ["True", "False"], a: 0, why: "Đoạn 2: “In Hanoi and Ho Chi Minh City, the first metro lines have opened”." },
+      { q: "All buses in Vietnam can be tracked on a mobile app.", o: ["True", "False"], a: 1, why: "Bài nói “many buses”, không phải “all”. Bẫy từ tuyệt đối." },
+      { q: "In small towns, buses run very frequently.", o: ["True", "False"], a: 1, why: "“Buses may run only once an hour” → không thường xuyên." },
+      { q: "Some young people would rather book a ride than own a vehicle.", o: ["True", "False"], a: 0, why: "“prefer booking a ride to owning a vehicle” = would rather book… than own." },
+      { q: "Cars move more easily than motorbikes in narrow streets.", o: ["True", "False"], a: 1, why: "Ngược lại: motorbikes “can move through narrow streets where cars cannot go”." }
+    ]},
+  { id: "r-tea", title: "The story of tea", type: "Câu hỏi từ vựng", skill: "vocab",
+    paras: ["According to a popular legend, tea was discovered by accident almost five thousand years ago, when a few leaves blew into a pot of water being boiled for a Chinese emperor. Whether or not the story is true, tea has been **cultivated** in China for thousands of years, and it was originally valued as a medicine rather than an everyday drink.",
+      "Over time, the habit of tea drinking spread along trade routes to Japan, Korea and later to Europe, where it became **fashionable** among wealthy families in the seventeenth century. Because tea was expensive, it was kept in locked boxes, and only the lady of the house held the key.",
+      "Today tea is one of the most **widely** consumed drinks in the world, second only to water. Its popularity is partly due to its **versatility**: it can be served hot or cold, plain or with milk, sugar, lemon or spices, and almost every culture has developed its own way of preparing it."],
+    qs: [
+      { q: "The word “cultivated” in paragraph 1 is closest in meaning to", o: ["grown", "sold", "cooked", "studied"], a: 0, why: "Ngữ cảnh: trồng trọt ở Trung Quốc hàng nghìn năm → grown." },
+      { q: "The word “fashionable” in paragraph 2 is closest in meaning to", o: ["cheap", "popular and stylish", "dangerous", "healthy"], a: 1, why: "Được giới giàu có ưa chuộng → popular and stylish." },
+      { q: "The word “widely” in paragraph 3 is closest in meaning to", o: ["rarely", "slowly", "by many people in many places", "carefully"], a: 2, why: "“second only to water” → được uống rộng rãi." },
+      { q: "The word “versatility” in paragraph 3 is closest in meaning to", o: ["high price", "ability to be used in many ways", "strong taste", "long history"], a: 1, why: "Manh mối định nghĩa sau dấu hai chấm: hot or cold, plain or with milk… → nhiều cách dùng." },
+      { q: "It can be inferred from paragraph 2 that in seventeenth-century Europe, tea was", o: ["a cheap drink for workers", "a luxury item", "used only as medicine", "grown in many gardens"], a: 1, why: "Đắt, được khóa trong hộp → hàng xa xỉ." }
+    ]},
+  { id: "r-bees", title: "Life in a beehive", type: "Câu hỏi tham chiếu", skill: "ref",
+    paras: ["Honeybees live in large colonies that may contain more than fifty thousand insects. Each colony has a single queen, whose main job is to lay eggs. **She** can lay up to two thousand eggs a day during the summer.",
+      "Most of the other bees are female workers. **These** are responsible for almost every task in the hive, from cleaning cells and feeding young bees to collecting nectar and defending the entrance. Male bees, called drones, do not collect food; **their** only role is to mate with a queen from another colony.",
+      "When a worker finds a good source of flowers, she returns to the hive and performs a special movement known as the “waggle dance”. **It** tells the other workers both the direction and the distance of the food. Scientists who have studied this behaviour for decades still consider **this** one of the most remarkable forms of communication in the animal world."],
+    qs: [
+      { q: "The word “She” in paragraph 1 refers to", o: ["the colony", "the queen", "a worker", "a drone"], a: 1, why: "Câu liền trước nói về “a single queen”." },
+      { q: "The word “These” in paragraph 2 refers to", o: ["eggs", "female workers", "cells", "drones"], a: 1, why: "Câu liền trước: “female workers”." },
+      { q: "The word “their” in paragraph 2 refers to", o: ["drones'", "workers'", "flowers'", "scientists'"], a: 0, why: "Cùng câu: “Male bees, called drones… their only role”." },
+      { q: "The word “It” in paragraph 3 refers to", o: ["the hive", "the waggle dance", "the food", "the entrance"], a: 1, why: "Danh từ gần nhất có thể “tell” hướng đi: the waggle dance." },
+      { q: "The word “this” in paragraph 3 refers to", o: ["the direction of the food", "the bees' behaviour of dancing to communicate", "the animal world", "the scientists' research"], a: 1, why: "“this behaviour” ngay trước đó = điệu nhảy giao tiếp." }
+    ]},
+  { id: "r-library", title: "Getting a library card", type: "Câu hỏi chi tiết · EXCEPT", skill: "detail",
+    paras: ["New students who wish to borrow books from the university library must first obtain a library card. To apply, complete the online registration form on the student portal and upload a recent photo. Then bring your student ID to the circulation desk on the ground floor, where a staff member will check your details and print your card. The card is free for the first year; a replacement for a lost card costs 50,000 dong.",
+      "Students may borrow up to five books at a time for a period of fourteen days. Loans can be renewed twice online, unless another student has reserved the book. Reference books, newspapers and theses cannot be taken out of the library and must be read in the reading room.",
+      "Late returns are charged at 2,000 dong per book per day. Students with unpaid fines will not be allowed to borrow further items until the fines are cleared."],
+    qs: [
+      { q: "Where must students bring their student ID?", o: ["The reading room", "The circulation desk", "The student portal", "The faculty office"], a: 1, why: "“bring your student ID to the circulation desk”." },
+      { q: "All of the following are needed to get a card EXCEPT", o: ["completing an online form", "uploading a photo", "paying a fee in the first year", "showing a student ID"], a: 2, why: "Thẻ miễn phí năm đầu. Ba ý còn lại đều có trong bài → loại trừ." },
+      { q: "How long can a book be kept before it must be renewed?", o: ["Five days", "Two weeks", "One month", "Fifty days"], a: 1, why: "“fourteen days” = two weeks (paraphrase)." },
+      { q: "Which of these can students take home?", o: ["A newspaper", "A thesis", "An ordinary textbook", "A reference book"], a: 2, why: "Ba loại còn lại phải đọc tại chỗ." },
+      { q: "A loan cannot be renewed if", o: ["it has already been renewed once", "another student has reserved the book", "the student lives far away", "the book is new"], a: 1, why: "“unless another student has reserved the book”. Được gia hạn 2 lần nên A sai." },
+      { q: "According to paragraph 3, students with unpaid fines", o: ["lose their card", "cannot borrow more items", "must pay double", "are reported to the dean"], a: 1, why: "“will not be allowed to borrow further items”." }
+    ]},
+  { id: "r-fourday", title: "The four-day work week", type: "Tổng hợp · mức B2", skill: "mixed",
+    paras: ["For more than a century, the five-day, forty-hour week has been the standard pattern of working life in most industrialised countries. Recently, however, a growing number of companies have begun to experiment with a four-day week, in which employees work fewer hours but receive the same salary.",
+      "One of the largest trials took place in the United Kingdom in 2022, when around sixty organisations, ranging from small bakeries to financial firms, reduced their staff's working time for six months. At the end of the trial, the vast majority of these companies chose to continue with the new schedule. Managers reported that productivity had remained stable, while staff said they felt less stressed and slept better. Moreover, the number of employees who **resigned** during the period fell considerably.",
+      "Supporters argue that a shorter week forces people to work more efficiently. Long, unnecessary meetings are cut, and workers concentrate harder because they know they have less time. **They** also point out that an extra day off allows parents to spend more time with their children and gives everyone a chance to rest properly.",
+      "Critics, on the other hand, are less convinced. They note that the model is difficult to apply in sectors such as healthcare, transport and retail, where services must be available every day. In these industries, reducing hours may simply mean hiring more staff, which raises costs. Others worry that some employees will try to squeeze five days of work into four, which could lead to longer and more exhausting working days.",
+      "It seems unlikely that the four-day week will become universal in the near future. Nevertheless, the trials have encouraged employers to rethink an idea that was once considered fixed: that more hours always mean more results."],
+    qs: [
+      { q: "What is the passage mainly about?", o: ["Why British companies pay higher salaries", "The results of, and debate around, a shorter working week", "How to reduce stress at work", "The history of the forty-hour week"], a: 1, why: "Câu hỏi ý chính: đọc câu chủ đề mỗi đoạn (skimming)." },
+      { q: "The word “resigned” in paragraph 2 is closest in meaning to", o: ["complained", "left their jobs", "were promoted", "worked overtime"], a: 1, why: "resign = nghỉ việc." },
+      { q: "According to paragraph 2, what happened after the UK trial?", o: ["Productivity fell slightly", "Most companies kept the new schedule", "Workers received lower salaries", "Only financial firms took part"], a: 1, why: "“the vast majority… chose to continue” = most companies kept it." },
+      { q: "The word “They” in paragraph 3 refers to", o: ["long meetings", "workers", "supporters", "parents"], a: 2, why: "Chủ ngữ của đoạn 3 là “Supporters argue…”." },
+      { q: "Which sector is NOT mentioned as difficult for the four-day week?", o: ["Healthcare", "Transport", "Education", "Retail"], a: 2, why: "Bài liệt kê healthcare, transport, retail." },
+      { q: "It can be inferred from the last paragraph that the author thinks", o: ["the four-day week will soon be used everywhere", "the trials have changed how employers think about working hours", "longer hours always produce better results", "the trials were a failure"], a: 1, why: "“encouraged employers to rethink” → thay đổi cách nghĩ." }
+    ]},
+  { id: "r-trees", title: "Why cities need trees", type: "Tổng hợp · mức B2", skill: "mixed",
+    paras: ["When people think of city planning, they usually imagine roads, buildings and public transport. Trees are often treated as decoration, something to be added if there is money left over. A growing body of research, however, suggests that urban trees are not a **luxury** but a necessity.",
+      "The most obvious benefit is temperature control. Concrete and asphalt absorb heat during the day and release it at night, so city centres are often several degrees warmer than the surrounding countryside. This effect, known as the urban heat island, can be reduced significantly by trees, which provide shade and release water vapour through their leaves.",
+      "Trees also improve people's health. **Their** leaves trap dust and other small particles, making the air cleaner to breathe. Studies have found that residents who live near green spaces tend to report lower levels of stress, and some hospital patients with a view of trees have been observed to recover more quickly than those facing a wall.",
+      "There are economic advantages, too. Shops on tree-lined streets often attract more customers, and houses near parks usually sell for higher prices. In addition, by cooling buildings in summer, trees can reduce the amount of electricity needed for air conditioning.",
+      "Despite these benefits, planting trees in cities is not simple. Young trees need regular watering and care, their roots can damage pavements and pipes, and space is limited in crowded areas. For this reason, experts recommend that city authorities choose species carefully and plan for maintenance from the beginning, rather than planting trees and leaving them to survive on their own."],
+    qs: [
+      { q: "What is the main idea of the passage?", o: ["Trees are more important to cities than many people think", "Trees should replace roads", "Planting trees is too expensive", "Hospitals should be built in parks"], a: 0, why: "Câu cuối đoạn 1 nêu luận điểm: “not a luxury but a necessity”." },
+      { q: "The word “luxury” in paragraph 1 is closest in meaning to", o: ["something necessary", "something pleasant but not essential", "something dangerous", "something cheap"], a: 1, why: "Manh mối trái nghĩa: luxury ≠ necessity." },
+      { q: "According to paragraph 2, why are city centres warmer?", o: ["There are more people", "Concrete and asphalt store heat", "Trees release heat at night", "Cars produce water vapour"], a: 1, why: "“absorb heat during the day and release it at night”." },
+      { q: "The word “Their” in paragraph 3 refers to", o: ["people's", "trees'", "particles'", "residents'"], a: 1, why: "Câu trước: “Trees also improve people's health”; lá là của cây." },
+      { q: "Which economic benefit is NOT mentioned?", o: ["More customers for shops", "Higher house prices", "Lower electricity use", "More jobs for gardeners"], a: 3, why: "Ba ý đầu có ở đoạn 4." },
+      { q: "What do experts recommend?", o: ["Stop planting trees in crowded areas", "Choose species carefully and plan maintenance", "Let trees survive on their own", "Plant only young trees"], a: 1, why: "Câu cuối bài." }
+    ]}
+];
+
+const READ_TIPS = [
+  { t: "Câu hỏi từ vựng", d: "Dạng “closest in meaning to / could be replaced by”. Đọc câu chứa từ cùng 1–2 câu trước và sau. Tìm manh mối: đồng nghĩa (or, that is), trái nghĩa (but, however, unlike), ví dụ (such as, like), định nghĩa (is, means, dấu hai chấm). Thay từng đáp án vào câu xem có hợp nghĩa không." },
+  { t: "Câu hỏi tham chiếu", d: "Dạng “The word … refers to”. Đọc câu chứa từ và câu liền trước. Khớp số ít/số nhiều (it/they, this/these) và người/vật (he/she với it). Thay đáp án vào chỗ đại từ để kiểm tra." },
+  { t: "Câu hỏi chi tiết", d: "Gạch từ khóa trong câu hỏi (tên, số liệu, thời gian), scan tìm trong bài, rồi đọc kỹ câu đó. Cẩn thận bẫy paraphrase và từ tuyệt đối (all, always, never). Với NOT/EXCEPT: tìm 3 ý có trong bài rồi loại trừ." },
+  { t: "Skimming và scanning", d: "Skimming là đọc lướt câu đầu/cuối mỗi đoạn để nắm ý chính, dùng cho câu hỏi main idea. Scanning là quét nhanh tìm từ khóa, số, tên riêng, dùng cho câu hỏi chi tiết và Đúng/Sai." }
+];
+
+const T1_PROMPTS = [
+  { f: "Informal", p: "Your English friend, Sara, is going to visit your city next month. Write an email to her. In your email, describe your city and its weather, recommend some places and activities, and suggest meeting up while she is there." },
+  { f: "Informal", p: "Your friend Claire has written to ask what is new in your life. You recently changed jobs. Reply to her: explain why you left your old job, describe your new job, and tell her one other piece of news." },
+  { f: "Formal", p: "You bought a washing machine last week, but it does not work properly. You phoned customer service but nobody has helped you yet. Write to the company: introduce yourself, explain the problem, and say what you want them to do." },
+  { f: "Formal", p: "You saw an advertisement for an evening English course. Write to the language centre to ask about the course content and timetable, the fees, and any entry requirements." },
+  { f: "Formal", p: "You are a teacher. Your class must move to another room for two weeks. Write an email to your students explaining the reason for the change, giving the new location, and telling them how to get there." },
+  { f: "Informal", p: "You are on holiday. Write an email to your friend Tom telling him where you are, why you chose this place, and who you are travelling with." }
+];
+const T2_PROMPTS = [
+  "Some people think that studying online is just as effective as studying in a classroom. Others disagree. Discuss both views and give your own opinion.",
+  "Social media does more harm than good to young people. To what extent do you agree or disagree?",
+  "More and more people are moving from the countryside to big cities. What are the reasons for this, and what problems does it cause?",
+  "Many companies now allow employees to work from home. Do the advantages of this outweigh the disadvantages?",
+  "Some people say that protecting the environment is the job of governments, not individuals. To what extent do you agree or disagree?",
+  "University education should be free for all students. Do you agree or disagree?"
+];
+const EMAIL_TMPL = `Dear ______,                      ← lời chào (Dear Mr/Ms + họ  |  Dear/Hi + tên)
+
+I hope this email finds you well. I am writing to ______.   ← mục đích thư
+
+Firstly, … (ý 1 của đề) + 2–3 chi tiết hỗ trợ.
+
+Secondly, … (ý 2 của đề) + 2–3 chi tiết hỗ trợ.
+
+Finally, … (ý 3 của đề) + 2–3 chi tiết hỗ trợ.
+
+I look forward to hearing from you soon.   ← câu kết / lời đề nghị
+
+Best regards,                       ← lời chào cuối
+[Tên]
+
+Mục tiêu: 150 từ (tối thiểu 120, dưới 200) · 20 phút`;
+const ESSAY_TMPL = `MỞ BÀI (2–3 câu)
+  Paraphrase đề + nêu rõ quan điểm.
+  It is often argued that … In my opinion, …
+
+THÂN BÀI 1 (5–6 câu)
+  Câu chủ đề → giải thích → ví dụ cụ thể.
+  Firstly, … This is because … For example, …
+
+THÂN BÀI 2 (5–6 câu)
+  Lý do thứ hai, hoặc mặt còn lại của vấn đề.
+  On the other hand, … / Furthermore, … As a result, …
+
+KẾT BÀI (2–3 câu)
+  Nhắc lại quan điểm + tóm tắt 2 ý chính.
+  In conclusion, … Therefore, …
+
+Mục tiêu: 260–300 từ · 40 phút · làm Task 2 TRƯỚC (chiếm 2/3 điểm)`;
+const B1_B2 = [
+  ["now", "currently / at the moment"], ["a busy, exciting city", "a vibrant city"], ["very old history", "a rich history"],
+  ["beautiful buildings", "stunning architecture"], ["delicious food", "mouth-watering local cuisine"], ["walk along", "stroll along"],
+  ["famous places", "iconic landmarks"], ["I go with my family", "I am accompanied by my family"], ["has many good things", "offers a perfect blend of …"],
+  ["very important", "crucial / essential"], ["a lot of people think", "it is widely believed that"], ["make better", "improve / enhance"],
+  ["bad effects", "negative consequences / drawbacks"], ["good points", "benefits / advantages"], ["because of this", "as a result / consequently"]
+];
+const CLASSIFY = [
+  { t: "Viết cho quản lý xin nghỉ phép hai ngày", a: "Formal" },
+  { t: "Kể cho bạn thân về một tai nạn buồn cười", a: "Informal" },
+  { t: "Gửi công ty bảo hiểm về hành lý bị thất lạc", a: "Formal" },
+  { t: "Kể cho bạn qua thư nước ngoài về ngày Tết", a: "Informal" },
+  { t: "Phàn nàn với nhà hàng về chất lượng món ăn", a: "Formal" },
+  { t: "Mời bạn đến dự tiệc tân gia", a: "Informal" },
+  { t: "Hỏi trung tâm ngoại ngữ về học phí", a: "Formal" },
+  { t: "Góp ý với hiệu trưởng để cải thiện thư viện", a: "Formal" },
+  { t: "Trả lời em họ hỏi thăm công việc mới", a: "Informal" },
+  { t: "Giải thích sự cố dịch vụ cho khách hàng", a: "Formal" },
+  { t: "Dear Sir or Madam,", a: "Formal" },
+  { t: "Hi Nam,", a: "Informal" },
+  { t: "I am writing to enquire about…", a: "Formal" },
+  { t: "Just a quick note to say…", a: "Informal" },
+  { t: "I would be grateful if you could…", a: "Formal" },
+  { t: "Can't wait to see you!", a: "Informal" },
+  { t: "I am writing to express my dissatisfaction with…", a: "Formal" },
+  { t: "Please do not hesitate to contact me.", a: "Formal" },
+  { t: "Take care and write back soon!", a: "Informal" },
+  { t: "Yours faithfully, (khi không biết tên người nhận)", a: "Formal" },
+  { t: "Best wishes, / Love,", a: "Informal" }
+];
+
+const SPEAK = [
+  { p1: [{ topic: "Your hometown", qs: ["Where is your hometown?", "What do you like most about it?", "Has your hometown changed much in recent years?"] },
+         { topic: "Reading", qs: ["Do you like reading?", "What kinds of books do you usually read?", "Do you prefer printed books or e-books? Why?"] }],
+    p2: { s: "A group of students is planning a weekend trip. Three options are suggested: going camping in the mountains, visiting a historical city, or staying at a beach resort. Which option do you think is the best choice?", o: ["Camping in the mountains", "Visiting a historical city", "Staying at a beach resort"] },
+    p3: { topic: "Online learning has many benefits", n: ["Flexible time and place", "Lower cost", "Access to many resources"], fu: ["What are the disadvantages of online learning?", "Do you think online learning will replace traditional classrooms?", "How can teachers keep online students motivated?"] } },
+  { p1: [{ topic: "Your work or study", qs: ["Do you work or are you a student?", "What do you enjoy most about it?", "What would you like to change about it?"] },
+         { topic: "Free time", qs: ["What do you usually do in your free time?", "Do you prefer spending free time alone or with others?", "Did you have more free time when you were a child?"] }],
+    p2: { s: "Your company wants to improve the health of its staff. Three options are suggested: building a small gym in the office, offering healthy lunches, or giving staff one extra day off each month. Which option do you think is the best?", o: ["A small office gym", "Healthy lunches", "One extra day off a month"] },
+    p3: { topic: "Living in a big city has more advantages than living in the countryside", n: ["Job opportunities", "Better healthcare and education", "Entertainment and services"], fu: ["What are the main problems of city life?", "Why do some people move back to the countryside?", "How can the government make rural areas more attractive?"] } },
+  { p1: [{ topic: "Weather", qs: ["What is the weather like in your area?", "What is your favourite kind of weather? Why?", "Does the weather affect your mood?"] },
+         { topic: "Shopping", qs: ["Do you enjoy shopping?", "Do you prefer shopping online or in stores?", "What was the last thing you bought?"] }],
+    p2: { s: "You want to improve your English for an exam. Three options are suggested: joining an English club, hiring a private tutor, or using learning apps. Which option do you think is the best?", o: ["An English club", "A private tutor", "Learning apps"] },
+    p3: { topic: "Young people should use social media carefully", n: ["Time-wasting and addiction", "Privacy risks", "Fake news"], fu: ["What are the benefits of social media for students?", "Should parents control their children's social media use?", "How has social media changed the way people communicate?"] } },
+  { p1: [{ topic: "Family", qs: ["How many people are there in your family?", "Who are you closest to in your family?", "What do you usually do together?"] },
+         { topic: "Transport", qs: ["How do you usually travel to work or school?", "Is public transport good in your city?", "Would you like to own a car in the future?"] }],
+    p2: { s: "Your city wants to reduce traffic jams. Three solutions are suggested: building more roads, improving public transport, or limiting the number of private vehicles. Which solution do you think is the best?", o: ["Building more roads", "Improving public transport", "Limiting private vehicles"] },
+    p3: { topic: "Protecting the environment is everyone's responsibility", n: ["Saving energy at home", "Reducing plastic waste", "Planting trees"], fu: ["What should governments do to protect the environment?", "Are young people more aware of environmental problems than older people?", "What environmental problem is most serious in Vietnam?"] } }
+];
+const SPEAK_PHRASES = {
+  p1: ["Well, to be honest, …", "I'd say that …, mainly because …", "For example, last week I …", "Actually, it depends. On the one hand … on the other hand …"],
+  p2: ["In this situation, there are three options: …, … and …", "In my opinion, … is the best choice for several reasons.", "Firstly, … Secondly, … Moreover, …", "The other options are less suitable. For instance, … would be too … because …", "So, all things considered, I would choose …"],
+  p3: ["I'm going to talk about …", "The first point I'd like to mention is …", "Another important point is that …", "Last but not least, …", "In addition to these points, I think …", "In conclusion, …"]
+};
+
+const VOCAB = {
+  "Nghe tuần 1": [
+    ["annual", "hàng năm"], ["appointment", "cuộc hẹn"], ["checkup", "buổi khám sức khỏe"], ["clinic", "phòng khám"], ["confirm", "xác nhận"],
+    ["contact", "liên hệ"], ["beverage", "đồ uống"], ["membership", "tư cách hội viên"], ["relaxation", "sự thư giãn"], ["relieve", "làm dịu, giảm bớt"],
+    ["announce", "thông báo"], ["approve", "phê duyệt"], ["contract", "hợp đồng"], ["enlarge", "mở rộng"], ["population", "dân số"],
+    ["rapid", "nhanh chóng"], ["employee", "nhân viên"], ["schedule", "lịch trình"], ["signature", "chữ ký"], ["protective", "bảo hộ"],
+    ["colleague", "đồng nghiệp"], ["department", "phòng ban"], ["downstairs", "ở tầng dưới"], ["relocate", "di dời"], ["personnel", "nhân sự"],
+    ["on duty", "đang trực"], ["accounting", "kế toán"], ["impressed", "ấn tượng"], ["experience", "kinh nghiệm"], ["interview", "phỏng vấn"],
+    ["achieve", "đạt được"], ["appreciation", "sự cảm kích"], ["growth", "sự tăng trưởng"], ["reminder", "lời nhắc"], ["dental", "thuộc nha khoa"],
+    ["cavity", "lỗ sâu răng"], ["renovation", "sự cải tạo, sửa chữa"], ["conference room", "phòng họp"], ["domestic", "trong nước, nội địa"], ["primary", "chính, chủ yếu"],
+    ["competition", "sự cạnh tranh"], ["retail", "bán lẻ"], ["coordinator", "điều phối viên"], ["unsure", "không chắc chắn"], ["announcer", "phát thanh viên"],
+    ["observe", "quan sát"], ["technique", "kỹ thuật"], ["procedure", "quy trình, thủ tục"], ["survey", "cuộc khảo sát"], ["confidence", "niềm tin"],
+    ["bolster", "củng cố"], ["inflation", "lạm phát"], ["interest rate", "lãi suất"], ["periodical", "tạp chí định kỳ"], ["inventory", "sự kiểm kê hàng"],
+    ["inconvenience", "sự bất tiện"], ["upcoming", "sắp tới"], ["representative", "người đại diện"], ["purchase", "việc mua; mua"], ["downtown", "khu trung tâm"],
+    ["construction", "sự thi công"], ["furniture", "đồ nội thất"], ["in stock", "còn hàng"], ["similar", "tương tự"], ["deadline", "hạn chót"],
+    ["assignment", "nhiệm vụ được giao"], ["accomplish", "hoàn thành"], ["landlord", "chủ nhà (cho thuê)"], ["spectacular", "ngoạn mục"], ["arrange", "sắp xếp"],
+    ["accommodation", "chỗ ở"], ["passenger", "hành khách"], ["patience", "sự kiên nhẫn"], ["privilege", "vinh dự, đặc quyền"], ["decade", "thập kỷ"],
+    ["reputable", "có uy tín"], ["tremendous strides", "bước tiến vượt bậc"], ["remind", "nhắc nhở"], ["medical insurance card", "thẻ bảo hiểm y tế"], ["human resources", "phòng nhân sự"],
+    ["available", "rảnh; có sẵn"], ["replace", "thay thế"], ["unfortunately", "thật không may"], ["ship", "vận chuyển, giao hàng"], ["concerning", "liên quan đến"],
+    ["application", "đơn ứng tuyển"], ["position", "vị trí công việc"], ["delivery", "sự giao hàng"], ["salesperson", "nhân viên bán hàng"], ["sluggish", "trì trệ, chậm chạp"],
+    ["sector", "lĩnh vực, ngành"], ["gear", "đồ dùng, trang bị"]
+  ],
+  "Đọc tuần 1": [
+    ["rely on", "dựa vào, phụ thuộc vào"], ["journey", "chuyến đi, hành trình"], ["private car", "ô tô cá nhân"], ["public transport", "giao thông công cộng"], ["urban area", "khu đô thị"],
+    ["desert (v)", "bỏ rơi"], ["insincere", "không chân thành"], ["consolation", "sự an ủi"], ["widespread", "phổ biến, lan rộng"], ["trace back", "truy về nguồn gốc"],
+    ["aptly", "một cách thích đáng"], ["minute (adj)", "nhỏ xíu"], ["adhere to", "dính vào; tuân thủ"], ["initiate", "bắt đầu, khởi xướng"], ["moisture", "độ ẩm"],
+    ["subsequent", "tiếp theo, sau đó"], ["myriad", "vô số"], ["epidemic", "dịch bệnh"], ["inhabitant", "cư dân"], ["isolated", "bị cô lập"],
+    ["virulent", "độc hại, nguy hiểm"], ["devastating", "tàn khốc"], ["outbreak", "sự bùng phát"], ["obtain", "lấy được, có được"], ["petition", "đơn xin, kiến nghị"],
+    ["registrar", "phòng đào tạo, quản lý hồ sơ"], ["permit", "cho phép"], ["dean", "trưởng khoa"], ["occupy", "chiếm giữ, cư trú"], ["vacant", "bỏ trống"],
+    ["retain", "giữ lại, duy trì"], ["mobility", "khả năng di chuyển"], ["discriminate", "phân biệt"], ["aggressive", "hung hăng"], ["encounter", "bắt gặp, chạm trán"],
+    ["seize", "chộp lấy"], ["investigate", "xem xét kỹ, điều tra"], ["texture", "kết cấu bề mặt"], ["critical", "then chốt, rất quan trọng"], ["drawback", "nhược điểm"],
+    ["outdated", "lỗi thời"], ["discrimination", "sự phân biệt đối xử"]
+  ],
+  "Giáo dục": [
+    ["tuition fee", "học phí"], ["curriculum", "chương trình học"], ["compulsory", "bắt buộc"], ["distance learning", "học từ xa"], ["academic performance", "kết quả học tập"],
+    ["lifelong learning", "học tập suốt đời"], ["scholarship", "học bổng"], ["critical thinking", "tư duy phản biện"], ["well-rounded", "phát triển toàn diện"], ["vocational training", "đào tạo nghề"]
+  ],
+  "Môi trường": [
+    ["pollution", "sự ô nhiễm"], ["emission", "khí thải"], ["renewable energy", "năng lượng tái tạo"], ["deforestation", "nạn phá rừng"], ["climate change", "biến đổi khí hậu"],
+    ["sustainable", "bền vững"], ["biodiversity", "đa dạng sinh học"], ["waste disposal", "xử lý rác thải"], ["carbon footprint", "lượng khí thải carbon"], ["raise awareness", "nâng cao nhận thức"]
+  ],
+  "Công nghệ": [
+    ["device", "thiết bị"], ["addiction", "sự nghiện"], ["privacy", "quyền riêng tư"], ["artificial intelligence", "trí tuệ nhân tạo"], ["cutting-edge", "tiên tiến nhất"],
+    ["online platform", "nền tảng trực tuyến"], ["cyberbullying", "bắt nạt qua mạng"], ["screen time", "thời gian dùng màn hình"], ["innovation", "sự đổi mới"], ["access", "truy cập; tiếp cận"]
+  ],
+  "Sức khỏe": [
+    ["sedentary lifestyle", "lối sống ít vận động"], ["balanced diet", "chế độ ăn cân bằng"], ["obesity", "béo phì"], ["mental health", "sức khỏe tinh thần"], ["immune system", "hệ miễn dịch"],
+    ["work out", "tập thể dục"], ["well-being", "sự khỏe mạnh, hạnh phúc"], ["chronic disease", "bệnh mãn tính"], ["stress-related", "liên quan đến căng thẳng"], ["prevention", "sự phòng ngừa"]
+  ],
+  "Công việc": [
+    ["work-life balance", "cân bằng công việc – cuộc sống"], ["remote work", "làm việc từ xa"], ["promotion", "sự thăng chức"], ["job satisfaction", "sự hài lòng với công việc"], ["workload", "khối lượng công việc"],
+    ["flexible hours", "giờ làm linh hoạt"], ["unemployment", "nạn thất nghiệp"], ["career prospects", "triển vọng nghề nghiệp"], ["productivity", "năng suất"], ["commute", "đi lại (đi làm)"]
+  ]
+};
+
+const GRAMMAR = [
+  { name: "Liên từ & từ nối", note: "because/since/as + mệnh đề · because of/due to + danh từ/V-ing · although + mệnh đề · despite/in spite of + danh từ/V-ing · so that + mệnh đề · in order to + V", type: "mcq", items: [
+    ["I wanted to go out, ___ it was raining heavily.", ["but", "so", "because", "unless"], 0],
+    ["___ the heavy traffic, we arrived on time.", ["Although", "Despite", "Because", "However"], 1],
+    ["She saved money every month ___ she could buy a laptop.", ["so that", "because of", "despite", "unless"], 0],
+    ["You won't pass the exam ___ you study harder.", ["if", "unless", "although", "so"], 1],
+    ["___ he was ill, he stayed at home.", ["Because", "Because of", "Despite", "In spite of"], 0],
+    ["The flight was delayed ___ bad weather.", ["because", "although", "due to", "so that"], 2],
+    ["My brother loves football, ___ my sister prefers music.", ["whereas", "so", "because", "unless"], 0],
+    ["Take an umbrella ___ it rains.", ["in case", "unless", "so that", "although"], 0],
+    ["___ does this phone take great photos, but it also has a long battery life.", ["Both", "Not only", "Either", "Neither"], 1],
+    ["You can borrow my car ___ you drive carefully.", ["as long as", "unless", "despite", "whereas"], 0],
+    ["He neither smokes ___ drinks.", ["or", "and", "nor", "but"], 2],
+    ["The company is expanding. ___, it needs to hire more staff.", ["However", "Therefore", "Although", "Despite"], 1]
+  ]},
+  { name: "Từ nối trình tự", note: "First → Then/Next → Afterwards → Finally/Eventually · Meanwhile = trong lúc đó · … later = … sau đó", type: "mcq", items: [
+    ["I waited in the hall. ___, my friend was talking to the teacher.", ["First", "Meanwhile", "Finally"], 1],
+    ["We waited for two hours. ___, the bus arrived.", ["Meanwhile", "Before", "Finally"], 2],
+    ["___, wash the rice. Then put it in the cooker.", ["After", "First", "Later"], 1],
+    ["We had dinner at a small restaurant. ___, we walked along the river.", ["Afterwards", "Meanwhile", "Before"], 0],
+    ["I met Nam in 2020. A few years ___, we worked for the same company.", ["then", "after", "later"], 2],
+    ["The tickets sold very quickly. ___, there were none left.", ["Eventually", "Meanwhile", "First"], 0]
+  ]},
+  { name: "Thì động từ", note: "Gõ dạng đúng của động từ trong ngoặc. Chấp nhận dạng viết tắt (don't, hasn't…).", type: "type", items: [
+    ["Water ___ (boil) at 100 degrees Celsius.", ["boils"]],
+    ["Look! The children ___ (play) in the rain.", ["are playing"]],
+    ["I ___ (live) in Can Tho since 2015.", ["have lived", "have been living", "'ve lived", "'ve been living"]],
+    ["She ___ (not finish) her report yet.", ["hasn't finished", "has not finished"]],
+    ["We ___ (go) to Da Lat last summer.", ["went"]],
+    ["While I ___ (cook) dinner, the phone rang.", ["was cooking"]],
+    ["Have you ever ___ (try) durian?", ["tried"]],
+    ["Don't worry. I ___ (help) you with your homework tonight.", ["will help", "'ll help", "am going to help", "am helping"]],
+    ["My parents ___ (not watch) TV when I got home.", ["weren't watching", "were not watching"]],
+    ["According to the timetable, the train ___ (leave) at 7 a.m. tomorrow.", ["leaves"]]
+  ]},
+  { name: "Động từ khuyết thiếu", note: "must = chắc chắn/bắt buộc · can't = chắc chắn không · mustn't = cấm · don't have to / needn't = không cần · should = nên · could = đã có thể (quá khứ)", type: "mcq", items: [
+    ["You ___ smoke in the hospital. It's forbidden.", ["mustn't", "don't have to", "can", "needn't"], 0],
+    ["You ___ bring food. Lunch is provided.", ["don't have to", "mustn't", "can't", "should"], 0],
+    ["She's been working since 6 a.m. She ___ be very tired.", ["must", "can't", "mustn't", "needn't"], 0],
+    ["That ___ be Nam. He's in Hanoi this week.", ["must", "can't", "should", "could"], 1],
+    ["When I was five, I ___ ride a bike.", ["could", "must", "should", "can"], 0],
+    ["You look ill. You ___ see a doctor.", ["should", "mustn't", "don't have to", "can't"], 0]
+  ]}
+];
+
+/* =========================================================
+   VIEWS
+   ========================================================= */
+const VIEWS = ["tong-quan", "nghe", "doc", "viet", "noi", "tu-vung", "ngu-phap"];
+const rendered = {};
+const RENDER = {};
+function show(id) {
+  if (!VIEWS.includes(id)) id = "tong-quan";
+  document.querySelectorAll(".view").forEach(v => { v.hidden = v.id !== "v-" + id; });
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.v === id)));
+  if (!rendered[id] || id === "tong-quan") { RENDER[id](); rendered[id] = true; }
+  try { history.replaceState(null, "", "#" + id); } catch (e) {}
+  TTS.stop();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => show(b.dataset.v)));
+
+/* ---------------- Tổng quan ---------------- */
+RENDER["tong-quan"] = function () {
+  const root = $("#v-tong-quan"); root.replaceChildren();
+  // progress numbers
+  const lKeys = Object.keys(S.listen);
+  const lTotal = LISTEN.reduce((n, s) => n + s.items.length, 0);
+  const lOk = lKeys.filter(k => S.listen[k].mcq).length;
+  const rDone = PASSAGES.filter(p => S.read[p.id]).length;
+  const rPct = rDone ? Math.round(PASSAGES.filter(p => S.read[p.id]).reduce((n, p) => n + S.read[p.id].best / p.qs.length, 0) / rDone * 100) : 0;
+  const allWords = [...new Set(Object.values(VOCAB).flat().map(w => w[0]))];
+  const known = allWords.filter(w => S.known[w]).length;
+  const drafts = Object.values(S.drafts).filter(t => words(t) >= 50).length;
+  const gTotal = GRAMMAR.reduce((n, g) => n + g.items.length, 0);
+  const gOk = Object.values(S.gram).filter(Boolean).length;
+
+  let countdown = null;
+  if (S.examDate) { const d = Math.ceil((new Date(S.examDate + "T00:00:00") - new Date()) / 86400000); countdown = d >= 0 ? `Còn ${d} ngày đến ngày thi` : "Ngày thi đã qua"; }
+  const dateIn = el("input", { type: "date", id: "exam-date", value: S.examDate || "", onchange: e => { S.examDate = e.target.value; save(); RENDER["tong-quan"](); } });
+
+  root.append(
+    el("div", { class: "sec-head" },
+      el("h2", { text: "Mục tiêu: điểm trung bình 4 kỹ năng từ 6.0" }),
+      el("p", { class: "lede", text: "Điểm VSTEP là trung bình của Nghe, Đọc, Viết, Nói (thang 10, làm tròn 0.5). Kỹ năng mạnh có thể bù cho kỹ năng yếu, nên hãy cố đẩy 1–2 kỹ năng lên 7.0 để có điểm dự phòng." })),
+    el("div", { class: "card stack" },
+      el("div", { class: "scale", "aria-hidden": "true" },
+        el("div", { class: "bar" }),
+        ...[[0, "0"], [40, "4.0"], [60, "6.0"], [85, "8.5"], [100, "10"]].map(([x, t]) => el("span", { class: "tick", style: `left:${x}%`, text: t })),
+        el("span", { class: "target-line" })),
+      el("div", { class: "row small", style: "gap:16px" },
+        el("span", {}, el("b", { text: "Dưới 4.0" }), " không xếp bậc"), el("span", {}, el("b", { text: "4.0–5.5" }), " B1"),
+        el("span", { style: "color:var(--accent)" }, el("b", { text: "6.0–8.0" }), " B2"), el("span", {}, el("b", { text: "8.5–10" }), " C1")),
+      el("div", { class: "row between", style: "border-top:1px solid var(--line);padding-top:10px" },
+        el("label", { class: "row small", for: "exam-date" }, el("span", { text: "Ngày thi của bạn:" }), dateIn),
+        countdown ? el("b", { text: countdown }) : el("span", { class: "small muted", text: "Nhập ngày thi để đếm ngược" })))
+  );
+
+  const stat = (v, k, pct) => el("div", { class: "card stat" }, el("span", { class: "v", text: v }), el("span", { class: "k", text: k }), pct != null ? el("div", { class: "meter" }, el("i", { style: `width:${Math.min(100, pct)}%` })) : null);
+  root.append(el("h3", { text: "Tiến độ của bạn" }),
+    el("div", { class: "grid3" },
+      stat(`${lKeys.length}/${lTotal}`, `Câu nghe đã làm · đúng ${lOk}`, lKeys.length / lTotal * 100),
+      stat(`${rDone}/${PASSAGES.length}`, `Bài đọc đã làm · trung bình ${rPct}%`, rDone / PASSAGES.length * 100),
+      stat(`${known}/${allWords.length}`, "Từ đã thuộc", known / allWords.length * 100),
+      stat(String(drafts), "Bài viết đã soạn (từ 50 chữ)", null),
+      stat(`${gOk}/${gTotal}`, "Câu ngữ pháp làm đúng", gOk / gTotal * 100),
+      stat(String(S.days.length), "Ngày đã luyện trên trang này", null)),
+    el("p", { class: "small muted", text: "Tiến độ chỉ lưu trên trình duyệt này. Xóa dữ liệu duyệt web sẽ mất tiến độ." }));
+
+  const fmt = [["Nghe", "~40 phút", "35 câu · 3 phần: 8 thông báo/hội thoại ngắn (dễ), 3 hội thoại dài × 4 câu (vừa), 3 bài giảng × 5 câu (khó)"],
+    ["Đọc", "60 phút", "40 câu · 4 bài, mỗi bài 400–500 từ và 10 câu; độ khó tăng dần từ B1 đến C1"],
+    ["Viết", "60 phút", "Task 1: thư/email ≥120 từ (1/3 điểm) · Task 2: bài luận ≥250 từ (2/3 điểm)"],
+    ["Nói", "12 phút", "Phần 1: tương tác xã hội · Phần 2: thảo luận giải pháp · Phần 3: phát triển chủ đề"]];
+  root.append(el("div", { class: "grid2" },
+    el("div", { class: "card stack" }, el("h3", { text: "Cấu trúc đề thi" }),
+      el("div", { class: "tbl-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", { text: "Kỹ năng" }), el("th", { text: "Thời gian" }), el("th", { text: "Nội dung" }))),
+        el("tbody", {}, fmt.map(r => el("tr", {}, el("td", {}, el("b", { text: r[0] })), el("td", { class: "num", text: r[1] }), el("td", { text: r[2] }))))))),
+    el("div", { class: "card stack" }, el("h3", { text: "Ghi nhớ khi vào phòng thi" }), el("span", { class: "tag ctu", text: "Theo lưu ý của trung tâm" }),
+      el("ul", { class: "clean" },
+        el("li", { text: "Nghe: chỉ được nghe một lần. Kiểm tra tai nghe trước khi bắt đầu." }),
+        el("li", { text: "Đọc lướt câu hỏi trước khi nghe, gạch từ khóa (Wh-, chủ ngữ, thời gian, danh từ, động từ)." }),
+        el("li", { text: "Đọc: làm theo thứ tự Part 1 → 4. Cần khoảng 23–24/40 câu đúng để đạt B2." }),
+        el("li", { text: "Học từ vựng theo chủ đề và học cả từ đồng nghĩa (đề hay paraphrase)." }),
+        el("li", { text: "Không bỏ trống câu nào ở Nghe và Đọc; sai không bị trừ điểm." })))));
+
+  const plan = [["15 phút", "Từ vựng", "Ôn thẻ chưa thuộc, làm 1 lượt trắc nghiệm.", "tu-vung"],
+    ["20 phút", "Nghe", "2–3 câu: nghe 1 lần, trả lời, rồi nghe lại để điền từ.", "nghe"],
+    ["20 phút", "Đọc hoặc Ngữ pháp", "1 bài đọc có bấm giờ (ngày chẵn) hoặc 1 nhóm ngữ pháp (ngày lẻ).", "doc"],
+    ["25 phút", "Viết hoặc Nói", "Viết 1 email/bài luận có bấm giờ, hoặc nói 1 bộ đề rồi chép lại để nhận xét.", "viet"]];
+  root.append(el("div", { class: "card stack" }, el("h3", { text: "Lịch luyện 80 phút mỗi ngày" }),
+    el("div", { class: "tbl-wrap" }, el("table", {}, el("tbody", {}, plan.map(p => el("tr", {},
+      el("td", { class: "num", style: "white-space:nowrap", text: p[0] }), el("td", {}, el("b", { text: p[1] })), el("td", { text: p[2] }),
+      el("td", { style: "text-align:right" }, el("button", { class: "btn ghost", text: "Mở", onclick: () => show(p[3]) })))))))),
+    el("p", { class: "note" }, el("b", { text: "Về tài liệu: " }), "trang này không chép lại bài nghe/bài đọc của trung tâm. Các bài luyện ở đây được soạn mới theo đúng dạng bài, chủ đề và danh sách từ của tuần 1. Khi có thêm tài liệu các tuần sau, bạn có thể nhờ Claude soạn bổ sung tương tự."));
+};
+
+/* ---------------- Nghe ---------------- */
+RENDER["nghe"] = function () {
+  const root = $("#v-nghe"); root.replaceChildren();
+  let set = 0, idx = 0;
+  const plays = {};
+  root.append(el("div", { class: "sec-head" },
+    el("h2", { text: "Nghe – Part 1: thông báo và tin nhắn ngắn" }),
+    el("p", { class: "lede", text: "Mỗi câu có 3 bước: nghe một lần rồi trả lời như trong phòng thi; nghe lại để điền từ còn thiếu; cuối cùng đọc lời thoại. Giọng đọc là giọng máy của trình duyệt, nên hãy luyện thêm bằng file âm thanh của lớp." })));
+  if (!TTS.ok()) root.append(el("p", { class: "note", text: "Trình duyệt này không hỗ trợ đọc văn bản thành giọng nói. Bạn vẫn làm được phần điền từ và đọc lời thoại." }));
+
+  const setChips = el("div", { class: "row" });
+  const rateSel = el("select", { id: "tts-rate", "aria-label": "Tốc độ đọc", onchange: e => { TTS.rate = parseFloat(e.target.value); } },
+    el("option", { value: "0.8", text: "Chậm (0.8×)" }), el("option", { value: "0.95", text: "Vừa (0.95×)", selected: true }), el("option", { value: "1.1", text: "Nhanh (1.1×)" }));
+  const examChk = el("input", { type: "checkbox", id: "exam-mode", checked: true });
+  const controls = el("div", { class: "row between" }, setChips,
+    el("div", { class: "row" }, el("label", { class: "row small", for: "exam-mode" }, examChk, "Chế độ thi: chỉ nghe 1 lần"), rateSel));
+  const dots = el("div", { class: "dots", role: "list" });
+  const stage = el("div", { class: "card stack" });
+  root.append(controls, dots, stage);
+
+  const key = () => `${set}-${idx}`;
+  const segs = t => { const out = []; const re = /\[([^\]]+)\]/g; let last = 0, m; while ((m = re.exec(t))) { if (m.index > last) out.push({ t: t.slice(last, m.index) }); out.push({ b: m[1] }); last = re.lastIndex; } if (last < t.length) out.push({ t: t.slice(last) }); return out; };
+  const plain = t => t.replace(/\[([^\]]+)\]/g, "$1");
+
+  function drawChips() {
+    setChips.replaceChildren(...LISTEN.map((s, i) => el("button", { class: "chip", "aria-pressed": String(i === set), text: s.name, onclick: () => { set = i; idx = 0; TTS.stop(); drawChips(); draw(); } })));
+  }
+  function drawDots() {
+    dots.replaceChildren(...LISTEN[set].items.map((_, i) => {
+      const r = S.listen[`${set}-${i}`];
+      return el("button", { class: "dot" + (r ? (r.mcq ? " ok" : " bad") : ""), "aria-current": String(i === idx), "aria-label": `Câu ${i + 1}`, text: String(i + 1), onclick: () => { idx = i; TTS.stop(); draw(); } });
+    }));
+  }
+  function draw() {
+    drawDots();
+    const it = LISTEN[set].items[idx];
+    const k = key();
+    const wave = el("span", { class: "wave", "aria-hidden": "true" }, el("i"), el("i"), el("i"), el("i"));
+    const status = el("span", { class: "small muted" });
+    const playBtn = el("button", { class: "btn primary" });
+    function refreshPlay() {
+      const n = plays[k] || 0;
+      const locked = examChk.checked && n >= 1 && !(S.listen[k]);
+      playBtn.textContent = n ? "Nghe lại" : "Phát bài nghe";
+      playBtn.disabled = locked;
+      status.textContent = locked ? "Đã nghe 1 lần. Hãy chọn đáp án." : (n ? `Đã nghe ${n} lần` : "Đọc câu hỏi trước khi phát");
+    }
+    playBtn.addEventListener("click", () => {
+      plays[k] = (plays[k] || 0) + 1; wave.classList.add("on"); refreshPlay(); markDay();
+      const ok = TTS.speak(plain(it.text), () => wave.classList.remove("on"));
+      if (!ok) wave.classList.remove("on");
+    });
+    examChk.onchange = refreshPlay;
+    const stopBtn = el("button", { class: "btn", text: "Dừng", onclick: () => { TTS.stop(); wave.classList.remove("on"); } });
+    refreshPlay();
+
+    // step 1: MCQ
+    const prev = S.listen[k];
+    const fb = el("div");
+    const optBtns = it.o.map((o, i) => el("button", { class: "opt", type: "button", onclick: () => choose(i) }, el("span", { class: "L", text: LETTERS[i] }), el("span", { text: o })));
+    const gapWrap = el("div", { class: "stack", hidden: !prev });
+    function lockOpts(chosen) {
+      optBtns.forEach((b, i) => { b.disabled = true; if (i === it.a) b.classList.add("correct"); else if (i === chosen) b.classList.add("wrong"); if (i === chosen) b.classList.add("picked"); });
+    }
+    function choose(i) {
+      if (S.listen[k]) return;
+      TTS.stop(); wave.classList.remove("on");
+      const ok = i === it.a;
+      S.listen[k] = { mcq: ok, pick: i }; save(); markDay();
+      lockOpts(i);
+      fb.replaceChildren(el("p", { class: "fb " + (ok ? "ok" : "bad"), text: ok ? "Chính xác." : `Chưa đúng. Đáp án là ${LETTERS[it.a]}.` }));
+      gapWrap.hidden = false; refreshPlay(); drawDots();
+    }
+    if (prev) { lockOpts(prev.pick); fb.replaceChildren(el("p", { class: "fb " + (prev.mcq ? "ok" : "bad"), text: prev.mcq ? "Bạn đã làm đúng câu này." : `Lần trước bạn chọn ${LETTERS[prev.pick]}. Đáp án là ${LETTERS[it.a]}.` })); }
+
+    // step 2: gap fill
+    const parts = segs(it.text);
+    const answers = parts.filter(p => p.b).map(p => p.b);
+    const bank = [...new Set([...answers, ...it.extra])].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    const selects = [];
+    const gapP = el("p", { class: "gap-text" });
+    let n = 0;
+    parts.forEach(p => {
+      if (p.t) gapP.append(p.t);
+      else { n++; const s = el("select", { "aria-label": `Chỗ trống ${n}` }, el("option", { value: "", text: `(${n})` }), bank.map(w => el("option", { value: w, text: w }))); s.dataset.ans = p.b; selects.push(s); gapP.append(s); }
+    });
+    const gapFb = el("div");
+    const transcript = el("p", { class: "transcript" });
+    parts.forEach(p => transcript.append(p.t ? p.t : el("b", { text: p.b })));
+    const ts = el("details", {}, el("summary", { text: "Xem lời thoại" }), transcript);
+    gapWrap.append(
+      el("div", { class: "row between" }, el("h4", { text: "Bước 2 · Nghe lại và điền từ" }), el("button", { class: "btn", text: "Nghe lại để điền", onclick: () => { wave.classList.add("on"); TTS.speak(plain(it.text), () => wave.classList.remove("on")); } })),
+      el("div", { class: "bank" }, bank.map(w => el("span", { text: w }))),
+      gapP,
+      el("div", { class: "row" }, el("button", { class: "btn primary", text: "Kiểm tra", onclick: () => {
+        let c = 0; selects.forEach(s => { const ok = s.value.toLowerCase() === s.dataset.ans.toLowerCase(); s.classList.toggle("ok", ok); s.classList.toggle("bad", !ok); if (ok) c++; });
+        S.listen[k] = Object.assign(S.listen[k] || {}, { gap: [c, selects.length] }); save();
+        gapFb.replaceChildren(el("p", { class: "fb " + (c === selects.length ? "ok" : "info"), text: `Đúng ${c}/${selects.length} chỗ trống.` + (c < selects.length ? " Ô đỏ là chỗ sai; nghe lại rồi thử tiếp." : "") }));
+      } }), gapFb),
+      el("h4", { text: "Bước 3 · Đối chiếu lời thoại" }), ts);
+
+    stage.replaceChildren(
+      el("div", { class: "row between" }, el("span", { class: "eyebrow", text: `${LISTEN[set].name} · Câu ${idx + 1}/${LISTEN[set].items.length}` }), el("span", { class: "tag", text: "Part 1" })),
+      el("div", { class: "player" }, playBtn, stopBtn, wave, status),
+      el("h4", { text: "Bước 1 · " + it.q }),
+      el("div", { class: "opts" }, optBtns), fb,
+      !prev ? el("button", { class: "btn ghost", style: "align-self:flex-start", text: "Bỏ qua, sang phần điền từ", onclick: e => { gapWrap.hidden = false; e.target.remove(); } }) : null,
+      gapWrap,
+      el("div", { class: "row between", style: "border-top:1px solid var(--line);padding-top:12px" },
+        el("button", { class: "btn", text: "← Câu trước", disabled: idx === 0, onclick: () => { idx--; TTS.stop(); draw(); } }),
+        el("button", { class: "btn ghost", text: "Làm lại câu này", onclick: () => { delete S.listen[k]; plays[k] = 0; save(); draw(); } }),
+        el("button", { class: "btn primary", text: "Câu sau →", disabled: idx === LISTEN[set].items.length - 1, onclick: () => { idx++; TTS.stop(); draw(); } })));
+  }
+  drawChips(); draw();
+};
+
+/* ---------------- Đọc ---------------- */
+RENDER["doc"] = function () {
+  const root = $("#v-doc");
+  function list() {
+    TTS.stop();
+    root.replaceChildren(
+      el("div", { class: "sec-head" }, el("h2", { text: "Đọc – luyện theo dạng câu hỏi" }),
+        el("p", { class: "lede", text: "Bốn bài đầu luyện riêng từng kỹ năng của tuần 1. Hai bài cuối dài hơn, trộn nhiều dạng câu hỏi, gần với Part 2–3 của đề thật. Mục tiêu: khoảng 60% số câu đúng." })),
+      el("div", { class: "plist" }, PASSAGES.map(p => {
+        const r = S.read[p.id];
+        return el("button", { class: "pitem", onclick: () => open(p) },
+          el("div", { class: "row between" }, el("span", { class: "tag", text: p.type }), el("span", { class: "best", text: r ? `Tốt nhất ${r.best}/${p.qs.length}` : "Chưa làm" })),
+          el("b", { text: p.title }), el("span", { class: "small muted", text: `${p.qs.length} câu hỏi` }));
+      })),
+      el("div", { class: "card stack" }, el("h3", { text: "Mẹo theo dạng câu hỏi" }),
+        el("div", { class: "grid2" }, READ_TIPS.map(t => el("div", { class: "stack", style: "gap:4px" }, el("h4", { text: t.t }), el("p", { class: "small", text: t.d }))))));
+  }
+  function open(p) {
+    window.scrollTo(0, 0);
+    const timer = Timer();
+    const picks = new Array(p.qs.length).fill(-1);
+    let submitted = false;
+    const qWrap = el("div", { class: "stack" });
+    const result = el("div");
+    p.qs.forEach((q, qi) => {
+      const btns = q.o.map((o, i) => el("button", { class: "opt", type: "button", onclick: () => { if (submitted) return; picks[qi] = i; btns.forEach((b, j) => b.classList.toggle("sel", j === i)); } }, el("span", { class: "L", text: LETTERS[i] }), el("span", { text: o })));
+      const why = el("p", { class: "why", hidden: true, text: q.why });
+      qWrap.append(el("div", { class: "q" }, el("span", { class: "qt", text: `${qi + 1}. ${q.q}` }), el("div", { class: "opts" }, btns), why));
+      q._btns = btns; q._why = why;
+    });
+    const submit = el("button", { class: "btn accent", text: "Nộp bài", onclick: () => {
+      if (submitted) return; submitted = true; timer.stop();
+      let c = 0;
+      p.qs.forEach((q, qi) => { const ok = picks[qi] === q.a; if (ok) c++; q._btns.forEach((b, j) => { b.disabled = true; b.classList.remove("sel"); if (j === q.a) b.classList.add("correct"); else if (j === picks[qi]) b.classList.add("wrong"); if (j === picks[qi]) b.classList.add("picked"); }); q._why.hidden = false; });
+      const prev = S.read[p.id]; S.read[p.id] = { best: Math.max(c, prev ? prev.best : 0), last: c }; save(); markDay();
+      const pct = c / p.qs.length;
+      result.replaceChildren(el("p", { class: "fb " + (pct >= 0.6 ? "ok" : "bad"), text: `Đúng ${c}/${p.qs.length} câu (${Math.round(pct * 100)}%). ` + (pct >= 0.6 ? "Đạt mức B2 cho dạng bài này." : "Chưa tới 60%. Đọc phần giải thích dưới mỗi câu rồi làm lại.") }));
+      submit.hidden = true; retry.hidden = false;
+    } });
+    const retry = el("button", { class: "btn", text: "Làm lại", hidden: true, onclick: () => open(p) });
+    root.replaceChildren(
+      el("div", { class: "row between" }, el("button", { class: "btn ghost", text: "← Danh sách bài đọc", onclick: list }),
+        el("div", { class: "row" }, el("span", { class: "small muted", text: "Gợi ý: 1,5 phút/câu" }), timer.el, el("button", { class: "btn", text: "Bấm giờ", onclick: () => timer.start(Math.round(p.qs.length * 90)) }))),
+      el("div", { class: "read-grid" },
+        el("div", { class: "card passage-card" }, el("div", { class: "stack" }, el("span", { class: "tag", text: p.type }), el("h3", { text: p.title }), el("div", { class: "passage" }, p.paras.map((t, i) => { const para = rich(t); para.prepend(el("span", { class: "eyebrow", text: `[${i + 1}] ` })); return para; })))),
+        el("div", { class: "card stack" }, qWrap, result, el("div", { class: "row" }, submit, retry))));
+  }
+  list();
+};
+
+/* ---------------- Viết ---------------- */
+RENDER["viet"] = function () {
+  const root = $("#v-viet"); root.replaceChildren();
+  const tabs = [["t1", "Email (Task 1)"], ["t2", "Bài luận (Task 2)"], ["mau", "Khung bài & cụm từ"], ["phan-loai", "Formal hay Informal?"]];
+  let cur = "t1";
+  const sub = el("div", { class: "subtabs" });
+  const body = el("div", { class: "stack" });
+  root.append(el("div", { class: "sec-head" }, el("h2", { text: "Viết – email và bài luận" }),
+    el("p", { class: "lede", text: "Trong phòng thi nên làm Task 2 trước vì chiếm 2/3 điểm. Bài viết tự lưu nháp trên trình duyệt. Khi mở trong Claude, bạn có thể bấm để được chấm theo 4 tiêu chí VSTEP." })), sub, body);
+  function drawSub() { sub.replaceChildren(...tabs.map(([id, t]) => el("button", { class: "chip", "aria-pressed": String(id === cur), text: t, onclick: () => { cur = id; drawSub(); draw(); } }))); }
+
+  function editor(task) {
+    const list = task === 1 ? T1_PROMPTS.map(x => x.p) : T2_PROMPTS;
+    let pi = 0;
+    const sel = el("select", { id: `w-sel-${task}`, "aria-label": "Chọn đề" }, list.map((p, i) => el("option", { value: String(i), text: `Đề ${i + 1}: ${p.slice(0, 70)}…` })));
+    const promptBox = el("div", { class: "prompt" });
+    const fTag = el("span", { class: "tag" });
+    const ta = el("textarea", { id: `w-ta-${task}`, rows: task === 1 ? 12 : 18, placeholder: task === 1 ? "Dear …," : "It is often argued that …", spellcheck: "false" });
+    const wc = el("span", { class: "wc" });
+    const timer = Timer();
+    const target = task === 1 ? 120 : 250;
+    const dkey = () => `w${task}-${pi}`;
+    let tmo = null;
+    function upd() { const n = words(ta.value); wc.textContent = `${n} / ${target} từ`; wc.className = "wc " + (n === 0 ? "" : n < target ? "low" : "good"); }
+    function load() {
+      pi = parseInt(sel.value, 10); promptBox.textContent = list[pi];
+      if (task === 1) { fTag.textContent = T1_PROMPTS[pi].f; fTag.hidden = false; } else fTag.hidden = true;
+      ta.value = S.drafts[dkey()] || ""; upd();
+    }
+    sel.addEventListener("change", load);
+    ta.addEventListener("input", () => { upd(); clearTimeout(tmo); tmo = setTimeout(() => { S.drafts[dkey()] = ta.value; save(); markDay(); }, 500); });
+    load();
+    return el("div", { class: "stack" },
+      el("div", { class: "card stack" },
+        el("div", { class: "row between" }, sel, task === 1 ? fTag : null),
+        promptBox,
+        el("details", {}, el("summary", { text: task === 1 ? "Xem khung email" : "Xem khung bài luận" }), el("div", { class: "tmpl", text: task === 1 ? EMAIL_TMPL : ESSAY_TMPL }))),
+      el("div", { class: "card stack" },
+        el("div", { class: "editor-bar" }, wc,
+          el("div", { class: "row" }, timer.el, el("button", { class: "btn", text: task === 1 ? "Bấm giờ 20 phút" : "Bấm giờ 40 phút", onclick: () => timer.start(task === 1 ? 1200 : 2400) }),
+            el("button", { class: "btn ghost", text: "Xóa bài", onclick: e => { if (e.target.dataset.c) { ta.value = ""; S.drafts[dkey()] = ""; save(); upd(); e.target.textContent = "Xóa bài"; delete e.target.dataset.c; } else { e.target.dataset.c = "1"; e.target.textContent = "Bấm lần nữa để xóa"; } } }))),
+        ta,
+        aiPanel("write", () => task, () => list[pi], () => ta.value)));
+  }
+
+  function templates() {
+    const sampleB1 = "Dear Tom,\n\nI hope you are well. I'm writing to tell you about my holiday. Now I am in Hoi An with my family. It is a very old town with beautiful buildings and delicious food. Every evening we walk along the river and look at the lanterns. The people here are very friendly. I want to come back here again next year.\n\nBest wishes,\nLan";
+    const sampleB2 = "Dear Tom,\n\nI hope this email finds you well. I'm writing to tell you about the holiday I am currently enjoying. At the moment I am in Hoi An, accompanied by my parents and my younger sister. This ancient town offers a perfect blend of rich history, stunning architecture and mouth-watering local cuisine. Every evening we stroll along the Thu Bon River, admiring the colourful lanterns. The locals are incredibly friendly, which makes the trip even more enjoyable. I would definitely love to come back next year.\n\nBest wishes,\nLan";
+    return el("div", { class: "stack" },
+      el("div", { class: "grid2" },
+        el("div", { class: "card stack" }, el("h3", { text: "Khung email (Task 1)" }), el("div", { class: "tmpl", text: EMAIL_TMPL })),
+        el("div", { class: "card stack" }, el("h3", { text: "Khung bài luận (Task 2)" }), el("div", { class: "tmpl", text: ESSAY_TMPL }))),
+      el("div", { class: "card stack" }, el("h3", { text: "Nâng cấp từ B1 lên B2" }),
+        el("p", { class: "small muted", text: "Giám khảo cho điểm Từ vựng cao hơn khi bạn dùng cụm từ chính xác, ít lặp. Thay dần các cách nói bên trái bằng cách nói bên phải." }),
+        el("div", { class: "tbl-wrap" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", { text: "Mức B1" }), el("th", { text: "Mức B2" }))),
+          el("tbody", {}, B1_B2.map(r => el("tr", {}, el("td", { class: "muted", text: r[0] }), el("td", {}, el("b", { text: r[1] })))))))),
+      el("div", { class: "grid2" },
+        el("div", { class: "card stack" }, el("span", { class: "tag", text: "Bài mẫu B1" }), el("div", { class: "improved", text: sampleB1 })),
+        el("div", { class: "card stack" }, el("span", { class: "tag ok", text: "Cùng ý, nâng lên B2" }), el("div", { class: "improved", text: sampleB2 }))));
+  }
+
+  function classify() {
+    const box = el("div", { class: "card" });
+    let score = 0, done = 0;
+    const tally = el("p", { class: "small muted" });
+    const upd = () => tally.textContent = `Đúng ${score}/${done} · còn ${CLASSIFY.length - done} mục`;
+    CLASSIFY.forEach(c => {
+      const fb = el("span", { class: "small" });
+      const mk = v => el("button", { class: "btn", text: v, onclick: () => {
+        if (fb.textContent) return; done++; const ok = v === c.a; if (ok) score++;
+        fb.textContent = ok ? "Đúng" : `Sai · ${c.a}`; fb.style.color = ok ? "var(--ok)" : "var(--bad)"; upd();
+      } });
+      box.append(el("div", { class: "cls-item" }, el("span", { class: "txt", text: c.t }), el("div", { class: "row" }, mk("Formal"), mk("Informal"), fb)));
+    });
+    upd();
+    return el("div", { class: "stack" },
+      el("p", { class: "lede", text: "Đề Task 1 thường cho biết người nhận. Viết cho người lạ, công ty, cấp trên thì dùng văn phong trang trọng (Formal). Viết cho bạn bè, người thân thì dùng thân mật (Informal). Chọn đúng văn phong ngay từ câu chào." }),
+      tally, box);
+  }
+
+  function draw() {
+    body.replaceChildren(cur === "t1" ? editor(1) : cur === "t2" ? editor(2) : cur === "mau" ? templates() : classify());
+  }
+  drawSub(); draw();
+};
+
+/* ---------------- Nói ---------------- */
+RENDER["noi"] = function () {
+  const root = $("#v-noi"); root.replaceChildren();
+  let si = 0;
+  const chips = el("div", { class: "row" });
+  const body = el("div", { class: "stack" });
+  root.append(el("div", { class: "sec-head" }, el("h2", { text: "Nói – 3 phần, 12 phút" }),
+    el("p", { class: "lede", text: "Bấm nút Nghe để máy đọc câu hỏi như giám khảo, rồi trả lời thành tiếng theo đồng hồ. Trang không thu âm được, nên hãy ghi âm bằng điện thoại. Sau đó chép lại lời mình nói (hoặc dùng tính năng đọc chính tả của bàn phím) để Claude nhận xét." })),
+    chips, body);
+  function drawChips() { chips.replaceChildren(...SPEAK.map((_, i) => el("button", { class: "chip", "aria-pressed": String(i === si), text: `Bộ đề ${i + 1}`, onclick: () => { si = i; TTS.stop(); drawChips(); draw(); } }))); }
+  const sayBtn = text => el("button", { class: "btn speak-btn", text: "Nghe", "aria-label": "Nghe câu hỏi", onclick: () => TTS.speak(text) });
+  const phrases = list => el("details", {}, el("summary", { text: "Cụm từ hữu ích" }), el("ul", { class: "clean small" }, list.map(p => el("li", { text: p }))));
+
+  function partTimer(prepSec, speakSec) {
+    const t = Timer();
+    const ph = el("span", { class: "phase muted", text: "" });
+    const start = el("button", { class: "btn primary", text: prepSec ? `Chuẩn bị ${prepSec / 60} phút` : `Bắt đầu nói (${speakSec / 60} phút)`, onclick: () => {
+      markDay();
+      if (prepSec) { ph.textContent = "Đang chuẩn bị"; t.start(prepSec, () => { ph.textContent = "Bắt đầu nói!"; t.start(speakSec); }); }
+      else { ph.textContent = "Đang nói"; t.start(speakSec); }
+    } });
+    const skip = prepSec ? el("button", { class: "btn", text: "Nói ngay", onclick: () => { ph.textContent = "Đang nói"; t.start(speakSec); } }) : null;
+    return el("div", { class: "row" }, start, skip, t.el, ph);
+  }
+
+  function draw() {
+    const d = SPEAK[si];
+    const p1 = el("div", { class: "card stack" },
+      el("div", { class: "row between" }, el("h3", { text: "Phần 1 · Tương tác xã hội" }), el("span", { class: "small muted", text: "~3 phút · 2 chủ đề × 3 câu" })),
+      el("p", { class: "small muted", text: "Trả lời mỗi câu 2–3 câu: ý chính, lý do, ví dụ ngắn." }),
+      ...d.p1.map(tp => el("div", { class: "stack", style: "gap:6px" }, el("h4", { text: tp.topic }),
+        el("ul", { class: "ql" }, tp.qs.map(q => el("li", {}, sayBtn(q), el("span", { class: "t", text: q })))))),
+      partTimer(0, 180), phrases(SPEAK_PHRASES.p1));
+    const p2 = el("div", { class: "card stack" },
+      el("div", { class: "row between" }, el("h3", { text: "Phần 2 · Thảo luận giải pháp" }), el("span", { class: "small muted", text: "1 phút chuẩn bị · 2 phút nói" })),
+      el("div", { class: "row" }, sayBtn(d.p2.s), el("p", { class: "prompt", style: "flex:1;min-width:0", text: d.p2.s })),
+      el("ol", { class: "clean" }, d.p2.o.map(o => el("li", { text: o }))),
+      el("p", { class: "small muted", text: "Chọn 1 phương án, đưa 2–3 lý do, rồi giải thích vì sao 2 phương án còn lại kém phù hợp hơn." }),
+      partTimer(60, 120), phrases(SPEAK_PHRASES.p2));
+    const p3 = el("div", { class: "card stack" },
+      el("div", { class: "row between" }, el("h3", { text: "Phần 3 · Phát triển chủ đề" }), el("span", { class: "small muted", text: "1 phút chuẩn bị · 3 phút nói + câu hỏi thêm" })),
+      el("div", { class: "row" }, sayBtn(d.p3.topic), el("span", { class: "small muted", text: "Phát triển chủ đề dựa trên sơ đồ, thêm một ý của riêng bạn." })),
+      el("div", { class: "mind" }, el("div", { class: "center", text: d.p3.topic }),
+        el("div", { class: "n n1", text: d.p3.n[0] }), el("div", { class: "n n2", text: d.p3.n[1] }), el("div", { class: "n n3", text: d.p3.n[2] }), el("div", { class: "n n4 you", text: "Ý của bạn" })),
+      partTimer(60, 180),
+      el("h4", { text: "Câu hỏi thêm của giám khảo" }),
+      el("ul", { class: "ql" }, d.p3.fu.map(q => el("li", {}, sayBtn(q), el("span", { class: "t", text: q })))),
+      phrases(SPEAK_PHRASES.p3));
+
+    const partSel = el("select", { id: "sp-part", "aria-label": "Chọn phần thi" }, el("option", { value: "1", text: "Phần 1" }), el("option", { value: "2", text: "Phần 2" }), el("option", { value: "3", text: "Phần 3" }));
+    const ta = el("textarea", { id: "sp-ta", rows: 7, placeholder: "Dán hoặc gõ lại những gì bạn đã nói…" });
+    const promptFor = v => v === "1" ? d.p1.map(t => t.topic + ": " + t.qs.join(" ")).join(" | ") : v === "2" ? d.p2.s : d.p3.topic + " (gợi ý: " + d.p3.n.join(", ") + ")";
+    const fbCard = el("div", { class: "card stack" },
+      el("h3", { text: "Nhận xét bài nói" }),
+      el("div", { class: "row" }, el("label", { for: "sp-part", class: "small", text: "Bài nói thuộc:" }), partSel),
+      ta, aiPanel("speak", () => "Phần " + partSel.value, () => promptFor(partSel.value), () => ta.value));
+    body.replaceChildren(p1, p2, p3, fbCard);
+  }
+  drawChips(); draw();
+};
+
+/* ---------------- Từ vựng ---------------- */
+RENDER["tu-vung"] = function () {
+  const root = $("#v-tu-vung"); root.replaceChildren();
+  const decks = Object.keys(VOCAB);
+  let deck = decks[0], mode = "the", i = 0, flipped = false, onlyNew = false, order = [];
+  const deckChips = el("div", { class: "row" });
+  const modeChips = el("div", { class: "row" });
+  const rangeBar = el("div", { class: "card stack", style: "padding:12px 14px;gap:10px" });
+  const body = el("div", { class: "stack" });
+  root.append(el("div", { class: "sec-head" }, el("h2", { text: "Từ vựng" }),
+    el("p", { class: "lede", text: "Hai bộ đầu lấy từ danh sách từ trong tài liệu tuần 1 của trung tâm. Các bộ còn lại là chủ đề hay gặp trong phần Viết và Nói. Mỗi ngày chọn một nhóm nhỏ để học, thẻ trong nhóm được trộn ngẫu nhiên." })),
+    deckChips, rangeBar, modeChips, body);
+  function getRange() {
+    const n = VOCAB[deck].length, r = (S.ranges || {})[deck];
+    return r ? [Math.min(Math.max(1, r[0]), n), Math.min(Math.max(1, r[1]), n)] : [1, n];
+  }
+  function inRange() { const [a, b] = getRange(); return VOCAB[deck].slice(a - 1, b); }
+  function setRange(a, b) {
+    const n = VOCAB[deck].length;
+    a = Math.min(Math.max(1, a | 0), n); b = Math.min(Math.max(1, b | 0), n);
+    if (a > b) [a, b] = [b, a];
+    S.ranges = S.ranges || {};
+    if (a === 1 && b === n) delete S.ranges[deck]; else S.ranges[deck] = [a, b];
+    save(); reorder(true); drawRange(); draw();
+  }
+  function drawRange() {
+    const all = VOCAB[deck], n = all.length, [a, b] = getRange(), size = S.groupSize || 15;
+    const isAll = a === 1 && b === n;
+    const groups = [];
+    for (let s = 1; s <= n; s += size) groups.push([s, Math.min(n, s + size - 1)]);
+    const chip = (label, ga, gb, on) => el("button", { class: "chip", "aria-pressed": String(on), text: label, onclick: () => setRange(ga, gb) });
+    const sizeSel = el("select", { id: "grp-size", "aria-label": "Số từ mỗi nhóm", onchange: e => { S.groupSize = parseInt(e.target.value, 10); save(); drawRange(); } },
+      [10, 15, 20, 30].map(v => el("option", { value: String(v), text: `${v} từ/nhóm`, selected: v === size })));
+    const from = el("input", { type: "number", id: "rg-from", min: "1", max: String(n), value: String(a), style: "width:72px", "aria-label": "Từ số" });
+    const to = el("input", { type: "number", id: "rg-to", min: "1", max: String(n), value: String(b), style: "width:72px", "aria-label": "Đến số" });
+    rangeBar.replaceChildren(
+      el("div", { class: "row between" }, el("b", { text: "Học theo nhóm" }), sizeSel),
+      el("div", { class: "row" }, chip(`Tất cả (${n})`, 1, n, isAll), groups.map(([ga, gb]) => {
+        const done = all.slice(ga - 1, gb).every(w => S.known[w[0]]);
+        return chip(`${ga}–${gb}${done ? " ✓" : ""}`, ga, gb, !isAll && a === ga && b === gb);
+      })),
+      el("div", { class: "row small" }, "Hoặc tự chọn: từ số", from, "đến số", to, el("button", { class: "btn", text: "Áp dụng", onclick: () => setRange(+from.value, +to.value) })),
+      el("p", { class: "small muted", text: isAll ? "Đang học cả bộ. Chọn một nhóm để học ít từ hơn mỗi ngày; nhóm có dấu ✓ là đã thuộc hết." : `Đang học từ số ${a} đến ${b} (${b - a + 1} từ). Thẻ đã được trộn; bấm “Trộn thẻ” để trộn lại.` }));
+  }
+  function cards() { const all = inRange(); return onlyNew ? all.filter(w => !S.known[w[0]]) : all; }
+  function reorder(sh) { const c = cards(); order = sh ? shuffle(c.map((_, k) => k)) : c.map((_, k) => k); i = 0; flipped = false; }
+  function drawChips() {
+    deckChips.replaceChildren(...decks.map(d => el("button", { class: "chip", "aria-pressed": String(d === deck), text: `${d} (${VOCAB[d].length})`, onclick: () => { deck = d; reorder(!!(S.ranges || {})[d]); drawChips(); drawRange(); draw(); } })));
+    modeChips.replaceChildren(
+      ...[["the", "Thẻ ghi nhớ"], ["quiz", "Trắc nghiệm 10 câu"], ["go", "Gõ từ tiếng Anh"], ["list", "Danh sách"]].map(([m, t]) => el("button", { class: "chip", "aria-pressed": String(m === mode), text: t, onclick: () => { mode = m; drawChips(); draw(); } })),
+      el("label", { class: "row small", for: "only-new", style: "margin-left:8px" }, el("input", { type: "checkbox", id: "only-new", checked: onlyNew, onchange: e => { onlyNew = e.target.checked; reorder(false); draw(); } }), "Chỉ từ chưa thuộc"));
+  }
+  function drawCard() {
+    const c = cards();
+    if (!c.length) { body.replaceChildren(el("div", { class: "card" }, el("p", { text: "Bạn đã thuộc hết bộ này. Bỏ chọn “Chỉ từ chưa thuộc” để ôn lại." }))); return; }
+    if (i >= order.length) i = 0;
+    const w = c[order[i]];
+    const known = !!S.known[w[0]];
+    const card = el("div", { class: "card flash" + (known ? " known" : ""), tabindex: "0", role: "button", "aria-label": "Lật thẻ", onclick: () => { flipped = !flipped; drawCard(); }, onkeydown: e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); flipped = !flipped; drawCard(); } } },
+      el("span", { class: "hint", text: `Từ số ${VOCAB[deck].indexOf(w) + 1}` }),
+      el("span", { class: "w", text: w[0] }),
+      flipped ? el("span", { class: "m", text: w[1] }) : el("span", { class: "hint", text: "Bấm để xem nghĩa" }),
+      known ? el("span", { class: "tag ok", text: "Đã thuộc" }) : null);
+    const markK = v => { if (v) S.known[w[0]] = 1; else delete S.known[w[0]]; save(); markDay(); drawRange(); next(); };
+    const next = () => { if (onlyNew) { order = cards().map((_, k) => k); if (i >= order.length) i = 0; } else i = (i + 1) % order.length; flipped = false; drawCard(); };
+    body.replaceChildren(card,
+      el("div", { class: "row between" },
+        el("div", { class: "row" }, el("button", { class: "btn", text: "←", "aria-label": "Thẻ trước", onclick: () => { i = (i - 1 + order.length) % order.length; flipped = false; drawCard(); } }),
+          el("span", { class: "prog", text: `${i + 1}/${order.length}` }),
+          el("button", { class: "btn", text: "→", "aria-label": "Thẻ sau", onclick: next })),
+        el("div", { class: "row" }, el("button", { class: "btn", text: "Nghe phát âm", onclick: e => { e.stopPropagation(); TTS.speak(w[0].replace(/\(.*?\)/g, "")); } }),
+          el("button", { class: "btn", text: "Trộn thẻ", onclick: () => { reorder(true); drawCard(); } }))),
+      el("div", { class: "row" }, el("button", { class: "btn", text: "Chưa thuộc", onclick: () => markK(false) }), el("button", { class: "btn primary", text: "Đã thuộc", onclick: () => markK(true) })),
+      el("p", { class: "prog", text: `Đã thuộc ${inRange().filter(x => S.known[x[0]]).length}/${inRange().length} từ trong nhóm này` }));
+  }
+  function drawQuiz() {
+    const pool = inRange();
+    const distract = pool.length >= 4 ? pool : VOCAB[deck]; // tiny ranges borrow wrong answers from the whole deck
+    const qs = shuffle(pool).slice(0, Math.min(10, pool.length));
+    let score = 0, done = 0;
+    const wrap = el("div", { class: "card stack" });
+    const tally = el("p", { class: "prog" });
+    const upd = () => tally.textContent = `Đúng ${score}/${done} · ${qs.length - done} câu còn lại`;
+    qs.forEach((w, qi) => {
+      const opts = shuffle([w, ...shuffle(distract.filter(x => x !== w)).slice(0, 3)]);
+      const fb = el("span", { class: "small" });
+      const btns = opts.map((o, k) => el("button", { class: "opt", type: "button", onclick: () => {
+        if (btns[0].disabled) return; done++;
+        const ok = o === w; if (ok) { score++; S.known[w[0]] = 1; save(); }
+        btns.forEach((b, j) => { b.disabled = true; if (opts[j] === w) b.classList.add("correct"); else if (j === k) b.classList.add("wrong"); if (j === k) b.classList.add("picked"); });
+        upd(); markDay();
+      } }, el("span", { class: "L", text: LETTERS[k] }), el("span", { text: o[1] })));
+      wrap.append(el("div", { class: "q" }, el("div", { class: "row between" }, el("span", { class: "qt", text: `${qi + 1}. ${w[0]}` }), el("button", { class: "btn speak-btn", text: "Nghe", onclick: () => TTS.speak(w[0].replace(/\(.*?\)/g, "")) })), el("div", { class: "opts" }, btns), fb));
+    });
+    upd();
+    body.replaceChildren(el("div", { class: "row between" }, tally, el("button", { class: "btn", text: "Đề khác", onclick: drawQuiz })), wrap);
+  }
+  function drawList() {
+    body.replaceChildren(el("div", { class: "card" }, el("div", { class: "wordlist" }, inRange().map(w => el("div", { class: S.known[w[0]] ? "k" : "" }, el("span", { class: "muted num", text: `${VOCAB[deck].indexOf(w) + 1}. ` }), el("b", { text: w[0] }), " – ", w[1])))));
+  }
+  function drawType() {
+    // Vietnamese meaning → type the English word; grammar labels like "(v)" are not required
+    const norm = s => s.toLowerCase().replace(/\(.*?\)/g, "").replace(/[’`]/g, "'").replace(/\s+/g, " ").trim();
+    const items = shuffle(inRange());
+    let score = 0, done = 0;
+    const tally = el("p", { class: "prog" });
+    const upd = () => tally.textContent = `Đúng ${score}/${items.length} · đã làm ${done}/${items.length}`;
+    const wrap = el("div", { class: "card stack" });
+    items.forEach((w, qi) => {
+      const inp = el("input", { type: "text", id: `go-${qi}`, autocomplete: "off", autocapitalize: "off", spellcheck: "false", "aria-label": `Từ tiếng Anh cho: ${w[1]}` });
+      const mark = el("span", { style: "font-weight:800;font-size:1.15rem;min-width:1.2em" });
+      const fb = el("span", { class: "small" });
+      let finished = false, tries = 0;
+      const finish = ok => {
+        finished = true; done++; if (ok) { score++; S.known[w[0]] = 1; save(); }
+        inp.disabled = true; markDay(); upd();
+      };
+      const check = () => {
+        if (finished || !inp.value.trim()) return;
+        tries++;
+        if (norm(inp.value) === norm(w[0])) {
+          mark.textContent = "✓"; mark.style.color = "var(--ok)"; inp.style.borderColor = "var(--ok)";
+          fb.textContent = tries > 1 ? "Đúng (sau khi sửa)" : ""; finish(tries === 1);
+        } else {
+          mark.textContent = "✗"; mark.style.color = "var(--bad)"; inp.style.borderColor = "var(--bad)";
+          fb.textContent = "Chưa đúng, thử lại hoặc bấm Gợi ý"; fb.style.color = "var(--bad)";
+          inp.select();
+        }
+      };
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") check(); });
+      const hint = el("button", { class: "btn ghost", text: "Gợi ý", onclick: () => {
+        if (finished) return;
+        const ans = w[0].replace(/\(.*?\)/g, "").trim();
+        fb.style.color = ""; fb.textContent = `Bắt đầu bằng “${ans.slice(0, Math.min(ans.length, 1 + tries))}…”, ${ans.length} ký tự`; tries++;
+      } });
+      const reveal = el("button", { class: "btn ghost", text: "Xem đáp án", onclick: () => {
+        if (finished) return;
+        inp.value = w[0]; mark.textContent = "✗"; mark.style.color = "var(--bad)"; fb.style.color = ""; fb.textContent = "Ghi nhớ từ này rồi làm lại lượt sau"; finish(false);
+      } });
+      wrap.append(el("div", { class: "gq" },
+        el("div", { class: "row between" }, el("span", { class: "qt", text: `${qi + 1}. ${w[1]}` }), el("span", { class: "small muted", text: `Từ số ${VOCAB[deck].indexOf(w) + 1}` })),
+        el("div", { class: "row" }, inp, mark, el("button", { class: "btn", text: "Kiểm tra", onclick: check }), hint, reveal),
+        fb));
+    });
+    upd();
+    body.replaceChildren(el("div", { class: "row between" }, tally, el("button", { class: "btn", text: "Trộn lại, làm lượt mới", onclick: drawType })),
+      el("p", { class: "small muted", text: "Gõ xong bấm Enter. Không cần gõ phần trong ngoặc như (v), (adj). Đúng ngay lần đầu thì từ được tính là đã thuộc." }), wrap);
+  }
+  function draw() { mode === "the" ? drawCard() : mode === "quiz" ? drawQuiz() : mode === "go" ? drawType() : drawList(); }
+  reorder(!!(S.ranges || {})[deck]); drawChips(); drawRange(); draw();
+};
+
+/* ---------------- Ngữ pháp ---------------- */
+RENDER["ngu-phap"] = function () {
+  const root = $("#v-ngu-phap"); root.replaceChildren();
+  root.append(el("div", { class: "sec-head" }, el("h2", { text: "Ngữ pháp nền cho Viết" }),
+    el("p", { class: "lede", text: "Bốn nhóm này bám theo phần ôn tập chương 1 trong file Writing tuần 1: cấu trúc câu, thì, động từ khuyết thiếu, liên từ và từ nối. Câu đúng được lưu vào tiến độ." })));
+  const norm = s => s.toLowerCase().replace(/[’`]/g, "'").replace(/\s+/g, " ").trim();
+  GRAMMAR.forEach((g, gi) => {
+    const card = el("div", { class: "card stack" }, el("h3", { text: g.name }), el("p", { class: "note", text: g.note }));
+    g.items.forEach((it, ii) => {
+      const k = `${gi}-${ii}`;
+      const fb = el("span", { class: "small" });
+      const setFb = ok => { fb.textContent = ok ? "Đúng" : "Sai"; fb.style.color = ok ? "var(--ok)" : "var(--bad)"; };
+      let ctrl;
+      if (g.type === "mcq") {
+        const btns = it[1].map((o, j) => el("button", { class: "opt", type: "button", onclick: () => {
+          const ok = j === it[2]; S.gram[k] = ok; save(); markDay();
+          btns.forEach((b, x) => { b.classList.remove("correct", "wrong", "picked"); if (x === j) b.classList.add(ok ? "correct" : "wrong", "picked"); });
+          setFb(ok); if (!ok) fb.textContent = "Sai, thử lại";
+        } }, el("span", { text: o })));
+        ctrl = el("div", { class: "opts" }, btns, fb);
+      } else {
+        const inp = el("input", { type: "text", id: `g-${k}`, autocomplete: "off", spellcheck: "false", "aria-label": "Đáp án" });
+        const check = () => { const ok = it[1].some(a => norm(a) === norm(inp.value)); S.gram[k] = ok; save(); markDay(); setFb(ok); if (!ok) fb.textContent = `Sai · đáp án: ${it[1][0]}`; };
+        inp.addEventListener("keydown", e => { if (e.key === "Enter") check(); });
+        ctrl = el("div", { class: "row" }, inp, el("button", { class: "btn", text: "Kiểm tra", onclick: check }), fb);
+      }
+      card.append(el("div", { class: "gq" }, el("span", { text: `${ii + 1}. ${it[0]}` }), ctrl));
+    });
+    root.append(card);
+  });
+};
+
+/* ---------------- boot ---------------- */
+const start = (location.hash || "").replace("#", "");
+show(VIEWS.includes(start) ? start : "tong-quan");
+</script>
