@@ -1,5 +1,4 @@
 @echo off
-chcp 65001 >nul
 title Phong luyen VSTEP B2
 cd /d "%~dp0"
 
@@ -11,20 +10,20 @@ set PY=
 where py >nul 2>nul && set PY=py
 if not defined PY where python >nul 2>nul && set PY=python
 if not defined PY (
-  echo Không tìm thấy Python. Cài Python tại https://www.python.org/downloads/ rồi chạy lại file này.
+  echo Khong tim thay Python. Cai Python tai https://www.python.org/downloads/ roi chay lai file nay.
   pause
   exit /b 1
 )
 
-echo Đang mở Phòng luyện VSTEP tại %URL%
-echo Lần đầu bấm "Cho phép" micro, các lần sau trình duyệt sẽ nhớ.
-echo Giữ cửa sổ này mở trong lúc học. Đóng cửa sổ (hoặc bấm Ctrl+C) để tắt.
+echo Dang mo Phong luyen VSTEP tai %URL%
+echo Lan dau bam "Cho phep" micro, cac lan sau trinh duyet se nho.
+echo Giu cua so nay mo trong luc hoc. Dong cua so (hoac bam Ctrl+C) de tat.
 echo.
 
 start "" "%URL%"
 %PY% -m http.server %PORT% --bind 127.0.0.1
 if errorlevel 1 (
   echo.
-  echo Không chạy được máy chủ. Có thể cổng %PORT% đang được dùng: nếu trang đã mở được thì cứ dùng bình thường.
+  echo Khong chay duoc may chu. Co the cong %PORT% dang duoc dung: neu trang da mo duoc thi cu dung binh thuong.
   pause
 )
