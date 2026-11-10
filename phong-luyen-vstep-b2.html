@@ -216,6 +216,14 @@ body.no-ai .ai-off{display:block}
 .wordlist div{break-inside:avoid;padding:3px 0;border-bottom:1px dotted var(--line)}
 .wordlist div.k{color:var(--muted)}
 .wordlist b{font-weight:600}
+.pron{gap:8px;padding:12px 14px}
+.rec-btn.on{background:var(--bad);border-color:var(--bad);animation:recpulse 1.2s ease-in-out infinite}
+@keyframes recpulse{50%{opacity:.7}}
+@media (prefers-reduced-motion:reduce){.rec-btn.on{animation:none}}
+.pron-msg{margin:0;padding:8px 10px;border-radius:8px;background:var(--sunk)}
+.pron-msg.ok{color:var(--ok);background:var(--ok-soft)}
+.pron-msg.warn{color:var(--warn);background:var(--warn-soft)}
+.pron-msg.bad{color:var(--bad);background:var(--bad-soft)}
 
 /* grammar */
 .gq{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -306,6 +314,90 @@ const TTS = {
   stop() { if (this.ok()) speechSynthesis.cancel(); }
 };
 TTS.init();
+
+/* ---------------- pronunciation check (speech recognition) ---------------- */
+const PRON = {
+  SR: window.SpeechRecognition || window.webkitSpeechRecognition || null,
+  stopCur: null,
+  norm(s) { return s.toLowerCase().replace(/\(.*?\)/g, "").replace(/[’`]/g, "'").replace(/-/g, " ").replace(/[^a-z' ]/g, "").replace(/\s+/g, " ").trim(); },
+  lev(a, b) {
+    const d = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+      let prev = d[0]; d[0] = i;
+      for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; }
+    }
+    return d[b.length];
+  },
+  sim(a, b) { const m = Math.max(a.length, b.length); return m ? 1 - this.lev(a, b) / m : 1; },
+  abort() { if (this.stopCur) this.stopCur(true); }
+};
+
+function pronBox(word) {
+  const target = word.replace(/\(.*?\)/g, "").trim(), nt = PRON.norm(target);
+  const res = el("div", { class: "pron-res", "aria-live": "polite" });
+  const btn = el("button", { class: "btn primary rec-btn", type: "button" }, "🎙 Ghi âm");
+  let busy = false, done = false, rec = null, heard = [], err = "", timer = null;
+  if (!PRON.SR) {
+    btn.disabled = true;
+    res.append(el("p", { class: "small muted", text: "Trình duyệt này không hỗ trợ kiểm tra phát âm. Hãy mở trang bằng Chrome hoặc Edge." }));
+  }
+  function setIdle() { busy = false; btn.classList.remove("on"); btn.replaceChildren("🎙 Ghi âm lại"); PRON.stopCur = null; }
+  function judge() {
+    if (!heard.length) {
+      const msg = { "not-allowed": "Trang chưa được phép dùng micro. Bấm biểu tượng ổ khóa/micro trên thanh địa chỉ để cho phép rồi thử lại.",
+        "service-not-allowed": "Trình duyệt chặn nhận dạng giọng nói. Hãy dùng Chrome hoặc Edge.",
+        "network": "Nhận dạng giọng nói cần kết nối mạng. Kiểm tra mạng rồi thử lại.",
+        "audio-capture": "Không tìm thấy micro." }[err] || "Không nghe thấy gì. Bấm Ghi âm, đọc to và rõ từ này rồi chờ một chút.";
+      res.replaceChildren(el("p", { class: "pron-msg bad", text: msg })); return;
+    }
+    const alts = heard.map(h => PRON.norm(h)).filter(Boolean);
+    const exact = alts.some(a => a === nt || (" " + a + " ").includes(" " + nt + " "));
+    let best = alts[0] || "", bs = 0;
+    const k = nt.split(" ").length; // also compare same-length word windows, e.g. "the annul" vs "annual"
+    alts.forEach(a => {
+      const ws = a.split(" "), cands = [a];
+      for (let s = 0; s + k <= ws.length; s++) cands.push(ws.slice(s, s + k).join(" "));
+      cands.forEach(c => { const v = PRON.sim(c, nt); if (v > bs) { bs = v; best = c; } });
+    });
+    const top = heard[0];
+    if (exact) {
+      res.replaceChildren(el("p", { class: "pron-msg ok" }, el("b", { text: "✓ Đúng rồi! " }), `Máy nghe được “${target}”.`));
+      S.pron = S.pron || {}; S.pron[word] = 1; save(); markDay();
+    } else if (bs >= 0.75) {
+      res.replaceChildren(el("p", { class: "pron-msg warn" }, el("b", { text: "≈ Gần đúng. " }), `Máy nghe thành “${best}”. Bấm “Nghe phát âm” để nghe mẫu, chú ý trọng âm và âm cuối rồi thử lần nữa.`));
+    } else {
+      res.replaceChildren(el("p", { class: "pron-msg bad" }, el("b", { text: "✗ Chưa đúng. " }), `Máy nghe thành “${top}”. Bấm “Nghe phát âm” để nghe mẫu rồi đọc chậm, rõ từng âm tiết.`));
+    }
+  }
+  function finish() {
+    if (done) return; done = true; clearTimeout(timer);
+    setIdle(); judge();
+  }
+  function stop(silent) {
+    if (!busy) return;
+    if (silent) { done = true; clearTimeout(timer); try { rec.abort(); } catch (e) {} busy = false; PRON.stopCur = null; return; }
+    try { rec.stop(); } catch (e) { finish(); }
+  }
+  function start() {
+    PRON.abort(); TTS.stop();
+    busy = true; done = false; heard = []; err = "";
+    btn.classList.add("on"); btn.replaceChildren("■ Dừng");
+    res.replaceChildren(el("p", { class: "pron-msg" }, "Đang nghe… hãy đọc to: ", el("b", { text: target })));
+    PRON.stopCur = stop;
+    rec = new PRON.SR();
+    rec.lang = "en-US"; rec.interimResults = false; rec.continuous = false; rec.maxAlternatives = 5;
+    rec.onresult = e => { for (const r of e.results) for (const a of r) if (a.transcript.trim()) heard.push(a.transcript.trim()); };
+    rec.onerror = e => { err = e.error; };
+    rec.onend = finish;
+    try { rec.start(); } catch (e) { finish(); return; }
+    timer = setTimeout(() => stop(false), 7000);
+  }
+  btn.onclick = () => busy ? stop(false) : start();
+  return el("div", { class: "card stack pron" },
+    el("div", { class: "row between" }, el("b", { text: "Kiểm tra phát âm" }), btn),
+    el("p", { class: "small muted", text: "Bấm Ghi âm rồi đọc to từ trên thẻ. Máy sẽ cho biết bạn đọc đúng từ hay chưa." }),
+    res);
+}
 
 /* ---------------- timer ---------------- */
 function Timer() {
@@ -746,7 +838,7 @@ function show(id) {
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.v === id)));
   if (!rendered[id] || id === "tong-quan") { RENDER[id](); rendered[id] = true; }
   try { history.replaceState(null, "", "#" + id); } catch (e) {}
-  TTS.stop();
+  TTS.stop(); PRON.abort();
   window.scrollTo(0, 0);
 }
 document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => show(b.dataset.v)));
@@ -1191,6 +1283,7 @@ RENDER["tu-vung"] = function () {
       el("label", { class: "row small", for: "only-new", style: "margin-left:8px" }, el("input", { type: "checkbox", id: "only-new", checked: onlyNew, onchange: e => { onlyNew = e.target.checked; reorder(false); draw(); } }), "Chỉ từ chưa thuộc"));
   }
   function drawCard() {
+    PRON.abort();
     const c = cards();
     if (!c.length) { body.replaceChildren(el("div", { class: "card" }, el("p", { text: "Bạn đã thuộc hết bộ này. Bỏ chọn “Chỉ từ chưa thuộc” để ôn lại." }))); return; }
     if (i >= order.length) i = 0;
@@ -1211,7 +1304,8 @@ RENDER["tu-vung"] = function () {
         el("div", { class: "row" }, el("button", { class: "btn", text: "Nghe phát âm", onclick: e => { e.stopPropagation(); TTS.speak(w[0].replace(/\(.*?\)/g, "")); } }),
           el("button", { class: "btn", text: "Trộn thẻ", onclick: () => { reorder(true); drawCard(); } }))),
       el("div", { class: "row" }, el("button", { class: "btn", text: "Chưa thuộc", onclick: () => markK(false) }), el("button", { class: "btn primary", text: "Đã thuộc", onclick: () => markK(true) })),
-      el("p", { class: "prog", text: `Đã thuộc ${inRange().filter(x => S.known[x[0]]).length}/${inRange().length} từ trong nhóm này` }));
+      el("p", { class: "prog", text: `Đã thuộc ${inRange().filter(x => S.known[x[0]]).length}/${inRange().length} từ trong nhóm này` }),
+      pronBox(w[0]));
   }
   function drawQuiz() {
     const pool = inRange();
