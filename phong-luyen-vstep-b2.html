@@ -148,6 +148,12 @@ th{font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--mu
 .gap-text select.bad{border-color:var(--bad);background:var(--bad-soft)}
 .transcript{font-family:var(--f-read);line-height:1.8;background:var(--sunk);border-radius:8px;padding:12px 14px}
 .transcript b{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.gap-text,.transcript{white-space:pre-line}
+.opt-why{margin:0;padding-left:18px;font-size:.88rem;display:flex;flex-direction:column;gap:4px}
+.opt-why li.sel{color:var(--ok);font-weight:600}
+.wk-h{margin:8px 0 -4px}
+.audio-list{display:flex;flex-wrap:wrap;gap:6px}
+.audio-card audio{width:100%}
 
 /* reading */
 .plist{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px}
@@ -237,7 +243,7 @@ body.no-ai .ai-off{display:block}
 <header class="top">
   <div class="wrap">
     <div class="brand"><h1>Phòng luyện VSTEP</h1><span class="lvl">B2 · 6.0+</span></div>
-    <p class="src">Bám theo giáo trình tuần 1, Trung tâm Ngoại ngữ ĐH Cần Thơ · bài luyện do Claude soạn</p>
+    <p class="src">Bám theo giáo trình tuần 1–2, Trung tâm Ngoại ngữ ĐH Cần Thơ · bài luyện do Claude soạn</p>
   </div>
 </header>
 <nav class="tabs" aria-label="Kỹ năng">
@@ -301,8 +307,30 @@ const TTS = {
     const pick = () => {
       const vs = speechSynthesis.getVoices();
       this.voice = vs.find(v => /en-US/i.test(v.lang) && /Natural|Google|Microsoft/i.test(v.name)) || vs.find(v => /^en[-_]/i.test(v.lang)) || null;
+      // two voices for dialogues (M: / W:); fall back to one voice with different pitch
+      const en = vs.filter(v => /^en[-_]/i.test(v.lang));
+      this.vW = en.find(v => /female|zira|aria|jenny|samantha|susan|hazel|libby|sonia|emma|ava|michelle/i.test(v.name)) || this.voice;
+      this.vM = en.find(v => /\bmale\b|david|mark|guy|ryan|daniel|alex|fred|george|christopher|eric|brian|andrew/i.test(v.name)) || this.voice;
     };
     pick(); speechSynthesis.onvoiceschanged = pick;
+  },
+  speakLines(text, onend) { // dialogue: one line per speaker turn, "M: …" or "W: …"
+    if (!this.ok()) { onend && onend(); return false; }
+    speechSynthesis.cancel();
+    const lines = text.split("\n").map(s => s.trim()).filter(Boolean);
+    let fired = false; const end = () => { if (!fired) { fired = true; onend && onend(); } };
+    lines.forEach((ln, i) => {
+      const m = /^([MW]):\s*(.*)$/.exec(ln);
+      const u = new SpeechSynthesisUtterance(m ? m[2] : ln);
+      u.lang = "en-US"; u.rate = this.rate;
+      const v = m ? (m[1] === "M" ? this.vM : this.vW) : this.voice;
+      if (v) u.voice = v;
+      if (m && this.vM === this.vW) u.pitch = m[1] === "M" ? 0.8 : 1.2;
+      u.onerror = end;
+      if (i === lines.length - 1) u.onend = end;
+      speechSynthesis.speak(u);
+    });
+    return true;
   },
   speak(text, onend) {
     if (!this.ok()) { onend && onend(); return false; }
@@ -501,7 +529,7 @@ function aiPanel(kind, getTask, getPrompt, getText) {
    DATA – bài luyện do Claude soạn, bám chủ đề & dạng bài tuần 1
    ========================================================= */
 const LISTEN = [
-  { name: "Bộ 1", items: [
+  { name: "Tuần 1 · Bộ 1", week: 1, items: [
     { text: "Hello, this is Mai from Riverside Dental Clinic. I'm calling to [confirm] your [appointment] for a routine [checkup] on Tuesday, March 4th at 9:30. Because this is your first [visit], please arrive fifteen minutes early to fill in a short form. If you need to change the time, please [contact] us at least one day in [advance]. Thank you.",
       extra: ["annual", "schedule", "medical"], q: "What is the main purpose of the call?", o: ["To cancel a checkup", "To confirm an appointment", "To ask for a payment", "To recommend a new doctor"], a: 1 },
     { text: "Feeling tired after a long week? Green Leaf Spa can help you [relieve] your stress and [relax]. This month we are offering a special [package] [including] a foot massage, a herbal bath and a light lunch, all for one low [price]. [Members] also receive an extra ten percent discount.",
@@ -519,7 +547,7 @@ const LISTEN = [
     { text: "Good evening, everyone, and welcome to our tenth [annual] staff dinner. When I started this company fifteen years ago, we had only three employees. Today we have over two hundred. I know that I could never [achieve] this [success] alone. Tonight is my chance to express my sincere [appreciation] for your hard work and for your role in the [growth] of our company.",
       extra: ["reserve", "solve", "appropriate"], q: "Who is most likely the speaker?", o: ["A new employee", "A customer", "The founder of the company", "A journalist"], a: 2 }
   ]},
-  { name: "Bộ 2", items: [
+  { name: "Tuần 1 · Bộ 2", week: 1, items: [
     { text: "Hello, this is a [reminder] from Bright Smile [Dental] Centre about your appointment on Wednesday at 3 p.m. Since you will have two teeth [filled], please [allow] about two hours for the [visit]. Please also [bring] your medical insurance card.",
       extra: ["full", "various", "dentist"], q: "Who is probably calling?", o: ["A hotel receptionist", "A dentist's receptionist", "A travel agent", "An insurance agent"], a: 1 },
     { text: "[Because] the main hall is undergoing [renovations], tomorrow's training session has been moved to [conference] room 4 on the third floor. The session will still be [held] at 9 a.m., and lunch will be provided as usual.",
@@ -536,7 +564,76 @@ const LISTEN = [
       extra: ["forecast", "delay", "safety"], q: "What will be provided for the travellers?", o: ["A free meal", "A hotel room", "A full refund", "A city tour"], a: 1 },
     { text: "Hi, this is Jenny from Quick Fix Phone [Repair]. I'm calling with an [update] on your phone. [Unfortunately], we need to [replace] the battery, which will cost about four hundred thousand dong. Please call me back to let me know if you want me to [order] a new one.",
       extra: ["prepare", "sneakers", "older"], q: "What is the listener asked to do?", o: ["Pick up the phone today", "Call back", "Buy a new phone", "Pay online"], a: 1 }
+  ]},
+  /* Tuần 2 – Part 1 hội thoại ngắn: cả 4 phương án thường đều được nhắc tới; "why" ghi chọn/loại từng phương án */
+  { name: "Tuần 2 · Bộ 3", week: 2, items: [
+    { text: "W: Hi, I'd like to know if my new [glasses] are ready. I ordered them last [Monday].\nM: Let me check… I'm [afraid] they won't arrive until Thursday morning.\nW: Thursday? I'm working all day on Thursday. What about [Friday]?\nM: That's fine. We [close] at six on Friday.\nW: Great. I'll come after work, at about half past five.",
+      extra: ["Tuesday", "open", "lenses"], q: "When will the woman collect her glasses?", o: ["On Monday", "On Thursday morning", "On Friday afternoon", "On Saturday"], a: 2,
+      why: ["Thứ Hai là ngày cô ấy đặt kính (“I ordered them last Monday”).", "Kính về sáng thứ Năm nhưng cô ấy bận cả ngày (“I'm working all day on Thursday”).", "Chọn: gợi ý “What about Friday?” được xác nhận “That's fine”, cô đến lúc 5:30 chiều.", "Không được nhắc đến."] },
+    { text: "W: Shall we see the new [science fiction] film tonight? There's a show at seven.\nM: Seven is too [early] for me. I don't finish work until half past six.\nW: OK. There's another one at a quarter to nine, but that one [finishes] very late.\nM: What about the one at eight?\nW: [Sorry], that one is [sold out].\nM: Then let's go for the late one. Tomorrow is a [holiday] anyway.",
+      extra: ["comedy", "cheap", "starts"], q: "What time will they watch the film?", o: ["6:30", "7:00", "8:00", "8:45"], a: 3,
+      why: ["6:30 là giờ anh ấy tan làm.", "Bị từ chối: “too early for me”.", "Hết vé: “that one is sold out”.", "Chọn: “let's go for the late one” = suất 8:45 (a quarter to nine)."] },
+    { text: "W: It's Ms. Lan's last day on Friday. What should we [give] her?\nM: How about some [flowers]?\nW: Hmm, she's [allergic] to flowers, remember?\nM: Oh, right. A [scarf], then?\nW: Perhaps… but we don't know which colours she likes. What about a photo book with pictures of our class?\nM: That's a lovely idea. She'll [remember] us every time she opens it.\nW: Great, I'll [collect] the photos.",
+      extra: ["plant", "forget", "buy"], q: "What gift do they decide to give Ms. Lan?", o: ["Some flowers", "A scarf", "A photo book", "A box of chocolates"], a: 2,
+      why: ["Cô Lan dị ứng hoa (“she's allergic to flowers”).", "“Perhaps… but” → không biết cô thích màu gì nên bỏ.", "Chọn: “That's a lovely idea”.", "Không được nhắc đến."] },
+    { text: "Hi Minh, it's Hoa. About our trip to Da Lat next week: I [checked] the flights, but they're too [expensive] at the moment. The overnight bus is cheap, but I can never [sleep] on buses. So I've [booked] two seats on the morning coach. It takes eight hours, but we'll see the [mountains] on the way. Your dad offered to drive us, but I don't want to [trouble] him.",
+      extra: ["train", "drove", "hotel"], q: "How will they travel to Da Lat?", o: ["By plane", "By overnight bus", "By morning coach", "By car with Minh's dad"], a: 2,
+      why: ["Vé máy bay quá đắt (“too expensive”).", "Hoa không ngủ được trên xe (“I can never sleep on buses”).", "Chọn: “I've booked two seats on the morning coach”.", "Không muốn làm phiền bố Minh (“I don't want to trouble him”)."] },
+    { text: "W: Are you ready to order?\nM: Yes. I'd like the [grilled] fish, please.\nW: I'm sorry, we've [run out] of fish this evening. The chicken curry is very [popular].\nM: Hmm, curry is a bit too [spicy] for me. Is the beef soup good?\nW: Yes, it's our chef's [special].\nM: OK, I'll have that, and a glass of [orange juice].",
+      extra: ["sweet", "dessert", "menu"], q: "What does the man order to eat?", o: ["Grilled fish", "Chicken curry", "Beef soup", "Fried rice"], a: 2,
+      why: ["Nhà hàng hết cá (“we've run out of fish”).", "Quá cay với anh ấy (“too spicy for me”).", "Chọn: “I'll have that” = món súp bò.", "Không được nhắc đến."] },
+    { text: "M: Is the team meeting still in room 201 this afternoon?\nW: No, room 201 is being [painted]. It's been [moved] to the library.\nM: The library? Isn't it too [noisy] there in the afternoon?\nW: That's right, so in the end the manager chose the [canteen]. It's [empty] after two o'clock.\nM: OK. See you there at [three].",
+      extra: ["quiet", "office", "two"], q: "Where will the meeting be held?", o: ["In room 201", "In the library", "In the canteen", "In the manager's office"], a: 2,
+      why: ["Phòng 201 đang được sơn.", "Đã định chuyển sang thư viện nhưng ở đó ồn (“That's right, so…”).", "Chọn: “in the end the manager chose the canteen”.", "Không được nhắc đến."] },
+    { text: "W: Can you [pick up] the kids from school today? I have to stay [late] at the office.\nM: I'm afraid I can't. I've got a [dentist] appointment at four.\nW: Oh no. What about asking your mother?\nM: She's visiting my [aunt] in Hue this week. Perhaps our [neighbour], Mrs. Mai, could help. She collects her son from the same school.\nW: Good idea. I'll [call] her now.",
+      extra: ["teacher", "early", "doctor"], q: "Who will probably collect the children?", o: ["Their mother", "Their father", "Their grandmother", "Their neighbour"], a: 3,
+      why: ["Người mẹ phải ở lại muộn ở công ty.", "Người bố có lịch nha sĩ lúc 4 giờ (“I'm afraid I can't”).", "Bà đang ở Huế thăm dì.", "Chọn: “Perhaps our neighbour… could help” → “Good idea”."] },
+    { text: "W: How much is this backpack?\nM: It's [nine hundred] thousand dong. But this week there's a [discount] of twenty percent.\nW: So that's seven hundred and twenty thousand. Do you have it in [blue]?\nM: Sorry, the blue one isn't on [sale]. It's still nine hundred.\nW: Never mind. I'll take the [black] one with the discount.",
+      extra: ["red", "price", "cheap"], q: "How much will the woman pay?", o: ["180,000 dong", "720,000 dong", "900,000 dong", "920,000 dong"], a: 1,
+      why: ["180.000 là số tiền được giảm (20% của 900.000), không được nói ra.", "Chọn: lấy chiếc màu đen có giảm giá = 720.000.", "Giá gốc, cũng là giá chiếc màu xanh.", "Không được nhắc đến."] }
+  ]},
+  { name: "Tuần 2 · Bộ 4", week: 2, items: [
+    { text: "M: The forecast says it'll [rain] on Saturday, but Sunday will be [sunny].\nW: Great, so we can go [hiking] on Sunday!\nM: Perhaps, but I [twisted] my ankle last week. I don't think I can walk that far.\nW: Oh, sorry. Then why don't we go [cycling] around the lake? It's flat.\nM: That sounds perfect. I'll [bring] some sandwiches.",
+      extra: ["swimming", "cloudy", "broke"], q: "What will they do on Sunday?", o: ["Stay at home because of the rain", "Go hiking", "Go cycling around the lake", "Have a picnic in the mountains"], a: 2,
+      why: ["Mưa là thứ Bảy, Chủ nhật trời nắng.", "“Perhaps, but…” → anh ấy bị trẹo mắt cá chân.", "Chọn: “why don't we go cycling…” → “That sounds perfect”.", "Có mang bánh mì nhưng không lên núi."] },
+    { text: "W: I'd like a room for two nights, please. Do you have one with a [sea view]?\nM: I'm afraid all the sea-view rooms are [fully booked]. We have a garden-view room on the first floor, or a city-view room on the tenth floor.\nW: The first floor might be [noisy]. Is the tenth-floor room [quiet]?\nM: Yes, very. And it has a large [balcony].\nW: OK, I'll [take] that one.",
+      extra: ["cheap", "small", "pool"], q: "Which room does the woman book?", o: ["A sea-view room", "A garden-view room", "A city-view room", "A room on the second floor"], a: 2,
+      why: ["Hết phòng (“fully booked”).", "Tầng 1 có thể ồn (“might be noisy”).", "Chọn: phòng tầng 10 nhìn ra thành phố, “I'll take that one”.", "Không được nhắc đến."] },
+    { text: "Last year I was in the [drama] club, and I really enjoyed it. This year I wanted to join the music club, but it [clashes] with my extra maths class on Tuesdays. My best friend tried to [persuade] me to join the football team, but I'm not very [sporty]. So in the end I joined the [photography] club. We meet on Thursdays, and next month we're having an [exhibition].",
+      extra: ["chess", "agrees", "lazy"], q: "Which club has the girl joined this year?", o: ["Drama", "Music", "Football", "Photography"], a: 3,
+      why: ["Câu lạc bộ của năm ngoái (“Last year…”).", "Trùng lịch học thêm toán (“it clashes with…”).", "Bạn rủ nhưng cô không giỏi thể thao.", "Chọn: “in the end I joined the photography club”."] },
+    { text: "M: I can't find my [wallet] anywhere. I had it at the [café] when I paid for our coffee.\nW: Did you put it in your [jacket]?\nM: I've checked. It's not there. Then we took a taxi to the [bookshop]…\nW: But you didn't pay for the taxi, I did. And at the bookshop you paid by [phone].\nM: That's right! So it must still be at the café. I'll [ring] them now.",
+      extra: ["purse", "bank", "card"], q: "Where did the man most likely leave his wallet?", o: ["In his jacket", "In the taxi", "At the bookshop", "At the café"], a: 3,
+      why: ["Đã kiểm tra, không có (“It's not there”).", "Người phụ nữ trả tiền taxi nên anh không lấy ví ra.", "Ở hiệu sách anh trả bằng điện thoại.", "Chọn: “it must still be at the café” – lần cuối dùng ví."] },
+    { text: "W: How many people are coming to your birthday [party] on Saturday?\nM: Well, I [invited] twenty, but four of them are [away] on a business trip.\nW: So sixteen?\nM: Not quite. Two of my cousins are also coming, so that's [eighteen].\nW: Then we'll need at least three [tables].",
+      extra: ["sixteen", "chairs", "guests"], q: "How many people will come to the party?", o: ["4", "16", "18", "20"], a: 2,
+      why: ["Số người vắng vì đi công tác.", "“Not quite” → chưa tính hai người anh em họ.", "Chọn: “so that's eighteen”.", "Số người được mời ban đầu."] },
+    { text: "M: Is your brother still working as a [bank clerk]?\nW: No, he left the bank last year. He [trained] to be a pilot for a while, but his eyesight wasn't good enough.\nM: Oh, what a pity. So what does he do now?\nW: He [teaches] English at a high school. He says it's [tiring], but he loves it. Actually, he's hoping to become a [tour guide] one day.",
+      extra: ["nurse", "boring", "studies"], q: "What is the woman's brother's job now?", o: ["Bank clerk", "Pilot", "Teacher", "Tour guide"], a: 2,
+      why: ["Công việc cũ, đã nghỉ năm ngoái.", "Từng học lái máy bay nhưng mắt không đạt.", "Chọn: “He teaches English at a high school”.", "Chỉ là mong muốn sau này (“hoping to… one day”)."] },
+    { text: "M: You're late today! Did you [drive]?\nW: No, my car is at the [garage] for repairs. I usually take the bus when that happens, but the drivers are on [strike] today.\nM: So did you walk?\nW: It's too far to walk. My [neighbour] gave me a lift on his motorbike.\nM: Lucky you. Maybe you can [share] a ride with me tomorrow.",
+      extra: ["taxi", "station", "borrow"], q: "How did the woman get to work today?", o: ["By car", "By bus", "On foot", "On her neighbour's motorbike"], a: 3,
+      why: ["Xe đang ở gara sửa.", "Tài xế xe buýt đình công (“on strike”).", "Quá xa để đi bộ.", "Chọn: “My neighbour gave me a lift on his motorbike”."] },
+    { text: "W: So, which flat do you like best?\nM: The one near the [river] is lovely, but the [rent] is too high for us.\nW: True. And the one above the market?\nM: It's cheap, but it'll be [noisy] early in the morning.\nW: What about the flat on Tran Phu Street? It's a bit [small], but it's close to both our offices.\nM: I [agree]. Let's [call] the owner this afternoon.",
+      extra: ["station", "price", "large"], q: "Which flat do they decide to rent?", o: ["The flat near the river", "The flat above the market", "The flat on Tran Phu Street", "The flat near the station"], a: 2,
+      why: ["Tiền thuê quá cao (“too high for us”).", "Rẻ nhưng ồn vào sáng sớm.", "Chọn: “What about…?” → “I agree”.", "Không được nhắc đến."] }
   ]}
+];
+
+/* Mẹo Part 1 tuần 2: nhóm cụm từ báo hiệu (ví dụ do Claude soạn) */
+const LISTEN_TIPS = [
+  { t: "Phủ định, từ chối", d: "I'm afraid…, …but…, That's a problem, I'm not really sure…, It's not so important. Phương án đi kèm thường bị LOẠI." },
+  { t: "Gợi ý", d: "What about…?, How about…?, Let's…, Why don't we…?, You could… Nghe tiếp câu trả lời ngay sau: đồng ý hay từ chối." },
+  { t: "Đồng ý, xác nhận", d: "That's right, OK, Certainly, Good idea, That sounds perfect, I'll take… Thường là câu CHỐT đáp án." },
+  { t: "Khả năng", d: "Perhaps, maybe, might, I think… Thông tin chưa chắc chắn; chờ câu xác nhận phía sau." },
+  { t: "Ai làm gì", d: "Đề hay hoán đổi người: ghi nhanh mỗi người (dad, sister, neighbour…) gắn với hành động nào." },
+  { t: "Cách ghi chú", d: "Đọc 4 phương án trước. Khi nghe, ghi ✓ (selected) hoặc ✗ (omitted) và lý do ngắn cạnh từng phương án, vì cả 4 phương án thường đều xuất hiện trong bài." }
+];
+
+/* Audio của lớp: chỉ phát được khi các thư mục này nằm cạnh file HTML (mở bằng mo-phong-luyen.bat) */
+const AUDIO = [
+  { name: "Tuần 1 · Listening Foundation", files: [1, 2, 3, 4, 5].flatMap(t => [1, 2, 3, 4, 5, 6, 7, 8].map(n => ({ label: `T${t}.${n}`, src: `Listening Week 1 audio/Audio Listening Foundation/T${t}.${n}.mp3` }))) },
+  { name: "Tuần 2 · Part 1 (1.1–1.16)", files: Array.from({ length: 16 }, (_, i) => ({ label: `1.${i + 1}`, src: `Listening Week 2 audio/B2 Recording 1.${i + 1}.mp3` })) }
 ];
 
 const PASSAGES = [
@@ -613,6 +710,61 @@ const PASSAGES = [
       { q: "The word “Their” in paragraph 3 refers to", o: ["people's", "trees'", "particles'", "residents'"], a: 1, why: "Câu trước: “Trees also improve people's health”; lá là của cây." },
       { q: "Which economic benefit is NOT mentioned?", o: ["More customers for shops", "Higher house prices", "Lower electricity use", "More jobs for gardeners"], a: 3, why: "Ba ý đầu có ở đoạn 4." },
       { q: "What do experts recommend?", o: ["Stop planting trees in crowded areas", "Choose species carefully and plan maintenance", "Let trees survive on their own", "Plant only young trees"], a: 1, why: "Câu cuối bài." }
+    ]},
+  /* ---- Tuần 2: ý chính, mục đích, suy luận, diễn đạt lại, chèn câu, các dạng khác ---- */
+  { id: "r2-coffee", week: 2, title: "Vietnam's coffee culture", type: "Ý chính · Mục đích", skill: "main",
+    paras: ["Vietnam is now the second-largest coffee producer in the world, yet the drink arrived in the country only in the second half of the nineteenth century, when French missionaries planted the first coffee trees. For decades, coffee remained a luxury enjoyed mainly by the French and by wealthy city residents.",
+      "Everything changed in the 1990s. Economic reforms allowed farmers in the Central Highlands to grow coffee for export, and production rose dramatically. Most of the beans grown were robusta, a variety that is easier to cultivate than arabica and contains almost twice as much caffeine.",
+      "As production grew, so did local creativity. Because fresh milk was hard to find in a hot climate, people began mixing strong coffee with sweetened condensed milk, creating iced milk coffee. In Hanoi, a shortage of milk in the 1940s is said to have led to egg coffee, in which egg yolk is whipped with sugar until it becomes a thick, creamy foam.",
+      "Today, coffee is less a drink than a way of life. Small plastic stools line the pavements from early morning, and friends spend hours chatting over a single cup. Meanwhile, modern chains attract young customers with air-conditioned spaces and free Wi-Fi, showing that the culture continues to evolve."],
+    qs: [
+      { q: "What is the passage mainly about?", o: ["How to make egg coffee at home", "How coffee culture in Vietnam developed over time", "Why robusta is better than arabica", "The problems faced by coffee farmers"], a: 1, why: "Các đoạn đi theo thời gian: du nhập → bùng nổ sản xuất → sáng tạo → văn hóa hôm nay. A, C quá hẹp (1 chi tiết); D không được đề cập." },
+      { q: "What is the main idea of paragraph 3?", o: ["Fresh milk was cheap in Vietnam", "Local conditions led to new ways of preparing coffee", "Egg coffee was invented by the French", "Hanoi produces more coffee than other regions"], a: 1, why: "Câu chủ đề “so did local creativity”; hai ví dụ phía sau đều do thiếu sữa tươi. A trái với bài." },
+      { q: "Why does the author mention robusta in paragraph 2?", o: ["To explain what kind of coffee Vietnam mainly grows", "To persuade readers to drink robusta", "To criticise farmers in the Central Highlands", "To compare Vietnamese and French tastes"], a: 0, why: "Câu cung cấp thông tin (inform/explain). Bài không có ý thuyết phục hay phê phán." },
+      { q: "The author mentions plastic stools and free Wi-Fi in paragraph 4 in order to", o: ["complain about crowded pavements", "illustrate that coffee is part of daily life in both old and new ways", "compare prices in different cafés", "advertise a coffee chain"], a: 1, why: "Hai chi tiết là ví dụ (illustrate) cho “a way of life” và “continues to evolve”." },
+      { q: "What is the main purpose of the passage?", o: ["To describe how coffee became an important part of Vietnamese life", "To argue that Vietnam should export less coffee", "To give instructions for growing coffee", "To warn readers about caffeine"], a: 0, why: "Bài thông tin, mô tả theo trình tự thời gian → to describe/inform." },
+      { q: "The passage would most likely be found in", o: ["a cookbook", "a magazine article about food and culture", "a scientific report on caffeine", "a café's price list"], a: 1, why: "Câu hỏi ngữ cảnh: giọng trung lập, có lịch sử và đời sống, không có công thức hay số liệu khoa học." }
+    ]},
+  { id: "r2-sleep", week: 2, title: "Why teenagers go to bed late", type: "Suy luận · Diễn đạt lại", skill: "infer",
+    paras: ["Parents often complain that their teenage children stay up late at night and are impossible to wake in the morning. It is tempting to blame mobile phones or laziness, but scientists have found that the cause is largely biological.",
+      "During puberty, the body begins to release melatonin, the hormone that makes us feel sleepy, about two hours later than it did in childhood. **As a result, a fifteen-year-old who goes to bed at ten o'clock may simply lie awake, not because of a lack of discipline but because the body is not yet ready to sleep.** Teenagers still need eight to ten hours of sleep a night, so an early alarm leaves many of them seriously short of rest.",
+      "This shortage has consequences. Sleep-deprived students find it harder to concentrate, remember new information and control their emotions. Some studies have also linked a lack of sleep to a higher risk of road accidents among young drivers.",
+      "In response, a number of school districts in the United States have moved the start of the school day from around 7:30 to 8:30 or later. Early results are encouraging: attendance has improved, and fewer students fall asleep in class. However, the change is not always popular. Bus timetables must be reorganised, and some parents worry that a later finish will cut into after-school jobs and sports."],
+    qs: [
+      { q: "Which of the following best restates the highlighted sentence in paragraph 2?", o: ["Teenagers who cannot fall asleep at ten are usually undisciplined.", "A teenager may be unable to sleep early because of natural body changes, not bad habits.", "Fifteen-year-olds should go to bed at exactly ten o'clock.", "Teenagers sleep better when they stay in bed for a long time."], a: 1, why: "Giữ đủ 2 ý: không ngủ được sớm + do cơ thể chứ không do thiếu kỷ luật. A đảo ngược nghĩa; C, D thêm ý mới." },
+      { q: "It can be inferred from paragraph 1 that many parents believe", o: ["their children's late nights are caused by phones or laziness", "teenagers need less sleep than adults", "melatonin is harmful", "schools should start later"], a: 0, why: "“It is tempting to blame mobile phones or laziness” → đây là cách nghĩ phổ biến." },
+      { q: "What can be inferred about a teenager who must get up at 6 a.m. for school?", o: ["He or she probably gets enough sleep", "He or she is likely to be short of sleep", "He or she will be a careful driver", "He or she usually falls asleep before nine"], a: 1, why: "Cơ thể buồn ngủ muộn + cần 8–10 tiếng → dậy 6 giờ dễ thiếu ngủ. Bài không nói thẳng, phải suy ra." },
+      { q: "Which sentence has the same meaning as “Early results are encouraging” in paragraph 4?", o: ["The first results suggest the change is working.", "The results will only be known much later.", "The results are worse than expected.", "Students have encouraged the change."], a: 0, why: "encouraging = đáng khích lệ. D dùng lại từ gốc (encourage) nhưng sai nghĩa – bẫy hay gặp." },
+      { q: "The author implies that changing school start times", o: ["has no effect on students", "brings benefits but also practical difficulties", "is supported by every parent", "is only possible in the United States"], a: 1, why: "Đoạn 4: kết quả tốt, rồi “However…” nêu khó khăn. C dùng từ tuyệt đối (every)." },
+      { q: "The tone of the passage can best be described as", o: ["mocking", "objective", "angry", "uninterested"], a: 1, why: "Trình bày nguyên nhân, hệ quả, ưu và nhược điểm, không bộc lộ cảm xúc → objective." }
+    ]},
+  { id: "r2-fashion", week: 2, title: "Turning waste into fashion", type: "Chèn câu · Cách tổ chức", skill: "insert",
+    paras: ["Every year, the fashion industry produces around 100 billion items of clothing, and a large share of them end up in landfill within a few years. **[A]** Cheap fabrics, rapidly changing trends and low prices encourage consumers to buy more and throw away more.",
+      "Some designers are now trying to break this cycle. **[B]** One Vietnamese brand, for example, collects used jeans from customers and turns them into bags and jackets. Another company in Europe makes trainers from plastic bottles collected from beaches. **[C]** Although these products are often more expensive than ordinary ones, they are attracting a growing number of young buyers who care about the environment.",
+      "Recycling alone, however, cannot solve the problem. **[D]** Experts point out that the most effective solution is simply to buy fewer clothes and to keep them longer. Repairing, swapping and renting clothes are all becoming more common, especially in large cities."],
+    qs: [
+      { q: "Where would this sentence best fit? “Such products give a second life to materials that would otherwise be wasted.”", o: ["[A]", "[B]", "[C]", "[D]"], a: 2, why: "“Such products” cần đứng SAU các ví dụ sản phẩm (túi từ quần jeans, giày từ chai nhựa) → [C]." },
+      { q: "Where would this sentence best fit? “Recycling also uses energy and water, and some materials cannot be recycled at all.”", o: ["[A]", "[B]", "[C]", "[D]"], a: 3, why: "Câu giải thích vì sao “Recycling alone… cannot solve the problem” → đứng ngay sau câu đó, ở [D]." },
+      { q: "What is the main idea of the passage?", o: ["Recycled fashion products are too expensive", "Fashion creates a lot of waste, and several ways of reducing it are being tried", "Young people buy too many trainers", "Vietnam has the best recycled-fashion brands"], a: 1, why: "Bao quát cả 3 đoạn. A, C quá hẹp; D không có trong bài." },
+      { q: "Why does the author mention the Vietnamese brand and the European company?", o: ["To give examples of designers who are breaking the cycle of waste", "To show which country is richer", "To criticise recycled products", "To explain how jeans are made"], a: 0, why: "Đứng sau “for example” → minh họa cho câu chủ đề đoạn 2." },
+      { q: "Which of the following best describes the organization of the passage?", o: ["A problem is described, then some solutions are discussed", "Events are presented in chronological order", "Two designers are compared and contrasted", "A theory is explained and then rejected"], a: 0, why: "Đoạn 1 nêu vấn đề; đoạn 2–3 nêu giải pháp (tái chế, mua ít hơn) → problem–solution." },
+      { q: "What would the paragraph following the passage most likely discuss?", o: ["The history of jeans", "Examples of services for repairing, swapping or renting clothes", "How plastic bottles are made", "The price of cotton in Asia"], a: 1, why: "Câu cuối nhắc repairing, swapping, renting → đoạn sau thường triển khai tiếp ý này." }
+    ]},
+  { id: "r2-bamboo", week: 2, title: "Bamboo: the “green steel”", type: "Tổng hợp tuần 2 · mức B2", skill: "mixed",
+    paras: ["Bamboo has been used in Asia for thousands of years to build houses, bridges and furniture. In recent decades, engineers and architects in other parts of the world have started to take a serious interest in it, and some now call it “green steel”.",
+      "The nickname reflects two of bamboo's most remarkable qualities. First, it is extremely strong for its weight: certain species can resist being pulled apart about as well as some types of steel. **[A]** Second, it grows **astonishingly** fast. Some varieties can grow almost a metre in a single day, and a plant can be harvested after three to five years, compared with several decades for most trees. **[B]**",
+      "Bamboo also offers environmental advantages. **Because it spreads through underground roots, it does not need to be replanted after it is cut, and the same plant can keep producing new stems for many years.** **[C]** Its dense root system also helps to hold soil in place, which reduces the risk of landslides on hillsides.",
+      "Nevertheless, bamboo is not a perfect material. Untreated bamboo can be attacked by insects and fungi, and it may rot if it stays wet. **[D]** In addition, because every stem is slightly different in size and shape, it is harder to produce standard parts than with steel or concrete. Researchers are therefore developing new treatments and processing methods that could make bamboo more durable and more predictable.",
+      "If these efforts succeed, bamboo could become a common sight not only in rural villages but also in modern cities, helping the construction industry to reduce its large carbon footprint."],
+    qs: [
+      { q: "What does the passage mainly discuss?", o: ["The history of bamboo houses in Asia", "The strengths and weaknesses of bamboo as a building material", "How steel is produced", "Why insects attack plants"], a: 1, why: "Đoạn 2–3: ưu điểm; đoạn 4: nhược điểm; đoạn 5: triển vọng." },
+      { q: "The word “astonishingly” in paragraph 2 is closest in meaning to", o: ["surprisingly", "slightly", "dangerously", "rarely"], a: 0, why: "Ví dụ phía sau (gần 1 mét/ngày) cho thấy mức độ đáng kinh ngạc." },
+      { q: "Which of the following best restates the highlighted sentence in paragraph 3?", o: ["Bamboo must be replanted every time it is harvested.", "Since bamboo grows from its roots, one plant can be cut many times without replanting.", "Bamboo roots are dangerous for other plants.", "Bamboo stems only grow for a few years."], a: 1, why: "Giữ quan hệ nguyên nhân (Because → Since) và đủ ý. A trái nghĩa; C, D không có trong câu." },
+      { q: "Where would this sentence best fit? “For this reason, it must be carefully dried and protected before use.”", o: ["[A]", "[B]", "[C]", "[D]"], a: 3, why: "“For this reason” chỉ nguyên nhân ngay trước: côn trùng, nấm, mục khi ẩm → [D]." },
+      { q: "It can be inferred from paragraph 4 that builders may prefer steel or concrete because these materials", o: ["are cheaper to grow", "can be made in more uniform sizes", "look more natural", "hold soil in place"], a: 1, why: "Tre mỗi cây một khác → khó làm chi tiết chuẩn; suy ra thép, bê tông đồng đều hơn." },
+      { q: "Why does the author compare bamboo with most trees in paragraph 2?", o: ["To emphasise how quickly bamboo can be harvested", "To show that trees are stronger", "To argue that people should stop planting trees", "To describe the shape of bamboo stems"], a: 0, why: "3–5 năm so với vài chục năm → nhấn mạnh (emphasise) tốc độ." },
+      { q: "The author's attitude towards bamboo can best be described as", o: ["strongly critical", "cautiously positive", "completely indifferent", "angry"], a: 1, why: "Nhiều ưu điểm, có thừa nhận nhược điểm (Nevertheless…), kết bằng “If these efforts succeed…” → tích cực nhưng thận trọng." },
+      { q: "The passage would most likely appear in", o: ["a popular science magazine", "a novel", "a restaurant review", "a personal diary"], a: 0, why: "Thông tin khoa học, giọng trung lập, dễ hiểu cho người đọc phổ thông." }
     ]}
 ];
 
@@ -620,7 +772,13 @@ const READ_TIPS = [
   { t: "Câu hỏi từ vựng", d: "Dạng “closest in meaning to / could be replaced by”. Đọc câu chứa từ cùng 1–2 câu trước và sau. Tìm manh mối: đồng nghĩa (or, that is), trái nghĩa (but, however, unlike), ví dụ (such as, like), định nghĩa (is, means, dấu hai chấm). Thay từng đáp án vào câu xem có hợp nghĩa không." },
   { t: "Câu hỏi tham chiếu", d: "Dạng “The word … refers to”. Đọc câu chứa từ và câu liền trước. Khớp số ít/số nhiều (it/they, this/these) và người/vật (he/she với it). Thay đáp án vào chỗ đại từ để kiểm tra." },
   { t: "Câu hỏi chi tiết", d: "Gạch từ khóa trong câu hỏi (tên, số liệu, thời gian), scan tìm trong bài, rồi đọc kỹ câu đó. Cẩn thận bẫy paraphrase và từ tuyệt đối (all, always, never). Với NOT/EXCEPT: tìm 3 ý có trong bài rồi loại trừ." },
-  { t: "Skimming và scanning", d: "Skimming là đọc lướt câu đầu/cuối mỗi đoạn để nắm ý chính, dùng cho câu hỏi main idea. Scanning là quét nhanh tìm từ khóa, số, tên riêng, dùng cho câu hỏi chi tiết và Đúng/Sai." }
+  { t: "Skimming và scanning", d: "Skimming là đọc lướt câu đầu/cuối mỗi đoạn để nắm ý chính, dùng cho câu hỏi main idea. Scanning là quét nhanh tìm từ khóa, số, tên riêng, dùng cho câu hỏi chi tiết và Đúng/Sai." },
+  { week: 2, t: "Câu hỏi ý chính", d: "“What is the main idea / mainly discuss…?” Skim câu đầu và câu cuối mỗi đoạn, đoạn đầu và đoạn cuối bài, để ý từ được lặp lại. Loại đáp án quá rộng, quá hẹp (chỉ 1 ví dụ), đúng nhưng không phải trọng tâm, hoặc không có trong bài." },
+  { week: 2, t: "Câu hỏi mục đích", d: "“Why does the author mention…? / The purpose of the passage is…” Nhận diện động từ mục đích: explain, describe, illustrate, compare, persuade, argue, emphasise, criticise. Bài có định nghĩa, số liệu → inform/describe; có ví dụ → illustrate; có ý kiến và lập luận → persuade/argue." },
+  { week: 2, t: "Câu hỏi suy luận", d: "“It can be inferred / The author implies…” Làm sau cùng. Quay lại đoạn liên quan, đọc thêm 1–2 câu xung quanh, tự rút kết luận trước khi xem đáp án. Loại đáp án tuyệt đối (always, never, every) và đáp án chỉ giống từ nhưng sai ý." },
+  { week: 2, t: "Câu hỏi diễn đạt lại", d: "“Which best restates the highlighted sentence?” Chọn câu giữ 100% ý, đúng quan hệ logic (nguyên nhân – kết quả, đối lập). Loại câu thêm ý, thiếu ý, đảo quan hệ, dùng lại nhiều từ gốc nhưng sai nghĩa, hoặc đổi mức độ (may → must)." },
+  { week: 2, t: "Câu hỏi chèn câu", d: "Đọc câu cần chèn trước, tìm dấu hiệu: this/these/such → sau câu nói về đối tượng đó; however → giữa hai ý đối lập; for example → sau ý khái quát; therefore/as a result/for this reason → sau nguyên nhân; also/another → sau ý cùng loại." },
+  { week: 2, t: "Các dạng khác", d: "Ngữ cảnh (bài in ở đâu, ai viết): nhìn chủ đề và thuật ngữ. Giọng điệu, thái độ: tìm tính từ, trạng từ đánh giá; bài học thuật thường objective. Đoạn trước/sau: xem câu đầu/câu cuối. Cách tổ chức: nhìn từ nối (problem–solution, cause–effect, chronological, compare–contrast)." }
 ];
 
 const T1_PROMPTS = [
@@ -759,6 +917,34 @@ const VOCAB = {
     ["retain", "giữ lại, duy trì"], ["mobility", "khả năng di chuyển"], ["discriminate", "phân biệt"], ["aggressive", "hung hăng"], ["encounter", "bắt gặp, chạm trán"],
     ["seize", "chộp lấy"], ["investigate", "xem xét kỹ, điều tra"], ["texture", "kết cấu bề mặt"], ["critical", "then chốt, rất quan trọng"], ["drawback", "nhược điểm"],
     ["outdated", "lỗi thời"], ["discrimination", "sự phân biệt đối xử"]
+  ],
+  "Nghe tuần 2": [
+    ["cut someone's hair", "cắt tóc cho ai"], ["make an appointment", "đặt lịch hẹn"], ["postcard", "bưu thiếp"], ["village", "ngôi làng"], ["behind", "phía sau"],
+    ["late (an hour late)", "trễ (trễ một tiếng)"], ["earrings", "bông tai"], ["useful", "hữu ích"], ["oven", "lò nướng"], ["turn the heat down", "giảm nhiệt"],
+    ["take ages", "mất rất nhiều thời gian"], ["cycle", "đạp xe"], ["swimming lesson", "buổi học bơi"], ["project", "dự án, bài tập lớn"], ["design (v)", "thiết kế"],
+    ["serious", "nghiêm khắc, nghiêm túc"], ["favourite subject", "môn học yêu thích"], ["long sleeves", "tay dài"], ["round neck", "cổ tròn"], ["V-neck", "cổ chữ V"],
+    ["look good on", "hợp với (ai)"], ["shelf", "cái kệ"], ["repair", "sửa chữa"], ["plant", "cây trồng"], ["sweet things", "đồ ngọt"],
+    ["playground", "sân chơi"], ["purse", "ví (nhỏ)"], ["fall out", "rơi ra"], ["hand in", "nộp lại, giao nộp"], ["be supposed to", "được cho là phải; được phép (phủ định: không được)"],
+    ["water sports centre", "trung tâm thể thao dưới nước"], ["indoor pool", "bể bơi trong nhà"], ["underwater diving", "lặn dưới nước"], ["sailing", "chèo thuyền buồm"], ["water skiing", "lướt ván nước"],
+    ["leaflet", "tờ rơi"], ["brilliant", "tuyệt vời"], ["empty", "trống vắng"], ["move into", "dọn vào ở"], ["supper", "bữa tối nhẹ"],
+    ["pack (v)", "đóng gói hành lý"], ["handle", "tay cầm"], ["stuff", "đồ đạc"], ["backpack", "ba lô"], ["good quality", "chất lượng tốt"],
+    ["pull along", "kéo theo"], ["cost much", "tốn nhiều tiền"], ["skateboarding", "trượt ván"], ["sold out", "bán hết vé"], ["fully booked", "kín chỗ"],
+    ["run out of", "hết (hàng)"], ["clash with", "trùng lịch với"], ["give someone a lift", "cho ai đi nhờ xe"], ["on strike", "đang đình công"], ["allergic to", "dị ứng với"]
+  ],
+  "Đọc tuần 2": [
+    ["impose regularity", "áp đặt sự đều đặn, nề nếp"], ["precise timekeeping", "việc đo giờ chính xác"], ["merchant", "thương nhân"], ["communal festivities", "lễ hội cộng đồng"], ["be in rough agreement", "tạm đồng thuận"],
+    ["apparent", "rõ ràng, dễ thấy"], ["public acceptance", "sự chấp nhận của công chúng"], ["yardstick", "thước đo"], ["unbearably chaotic", "hỗn loạn không chịu nổi"], ["in fits and starts", "ngắt quãng, lúc có lúc không"],
+    ["the fabric of society", "kết cấu, cốt lõi của xã hội"], ["species", "loài"], ["evolve", "tiến hóa"], ["millennia", "hàng thiên niên kỷ"], ["primitive", "nguyên thủy"],
+    ["consist of", "bao gồm"], ["dense", "dày đặc"], ["prevail", "chiếm ưu thế, phổ biến"], ["forerunner", "tiền thân"], ["tremendous", "to lớn"],
+    ["deciduous", "rụng lá theo mùa"], ["magic bullet", "giải pháp thần kỳ"], ["assume", "cho rằng, giả định"], ["circulate", "lưu hành, lan truyền"], ["lax", "lỏng lẻo"],
+    ["magnetosphere", "từ quyển"], ["spherical", "hình cầu"], ["teardrop", "giọt nước mắt (hình giọt nước)"], ["compress", "nén, ép"], ["detectable", "có thể phát hiện"],
+    ["dissimilar", "khác biệt"], ["skewer (v)", "xiên vào que"], ["ear of corn", "bắp ngô"], ["kernel", "hạt ngô, hạt ngũ cốc"], ["cob", "lõi ngô"],
+    ["heat source", "nguồn nhiệt"], ["explode", "nổ tung"], ["method", "phương pháp"], ["mental image", "hình ảnh trong tâm trí"], ["combine", "kết hợp"],
+    ["assign", "gán cho, giao cho"], ["recall", "nhớ lại; khả năng nhớ lại"], ["significantly", "một cách đáng kể"], ["concept", "khái niệm"], ["process (v)", "xử lý"],
+    ["strategy", "chiến lược"], ["fog", "sương mù"], ["essentially", "về bản chất"], ["humidity", "độ ẩm không khí"], ["saturation", "sự bão hòa"],
+    ["dew point", "điểm sương"], ["condense", "ngưng tụ"], ["vapor", "hơi nước"], ["moisture-laden", "chứa đầy hơi ẩm"], ["relative humidity", "độ ẩm tương đối"],
+    ["automated", "tự động hóa"], ["industrial robot", "robot công nghiệp"], ["microcomputer", "máy vi tính"], ["programmed", "được lập trình"], ["counterpart", "đối tượng tương ứng"],
+    ["assemble", "lắp ráp"], ["mechanical component", "linh kiện cơ khí"], ["branch from", "phát triển, tách ra từ"], ["exploration", "sự thám hiểm"]
   ],
   "Giáo dục": [
     ["tuition fee", "học phí"], ["curriculum", "chương trình học"], ["compulsory", "bắt buộc"], ["distance learning", "học từ xa"], ["academic performance", "kết quả học tập"],
@@ -915,7 +1101,7 @@ RENDER["tong-quan"] = function () {
     el("div", { class: "tbl-wrap" }, el("table", {}, el("tbody", {}, plan.map(p => el("tr", {},
       el("td", { class: "num", style: "white-space:nowrap", text: p[0] }), el("td", {}, el("b", { text: p[1] })), el("td", { text: p[2] }),
       el("td", { style: "text-align:right" }, el("button", { class: "btn ghost", text: "Mở", onclick: () => show(p[3]) })))))))),
-    el("p", { class: "note" }, el("b", { text: "Về tài liệu: " }), "trang này không chép lại bài nghe/bài đọc của trung tâm. Các bài luyện ở đây được soạn mới theo đúng dạng bài, chủ đề và danh sách từ của tuần 1. Khi có thêm tài liệu các tuần sau, bạn có thể nhờ Claude soạn bổ sung tương tự."));
+    el("p", { class: "note" }, el("b", { text: "Về tài liệu: " }), "trang này không chép lại bài nghe/bài đọc của trung tâm. Các bài luyện ở đây được soạn mới theo đúng dạng bài, chủ đề và danh sách từ của tuần 1–2. Khi có thêm tài liệu các tuần sau, bạn có thể nhờ Claude soạn bổ sung tương tự."));
 };
 
 /* ---------------- Nghe ---------------- */
@@ -924,8 +1110,8 @@ RENDER["nghe"] = function () {
   let set = 0, idx = 0;
   const plays = {};
   root.append(el("div", { class: "sec-head" },
-    el("h2", { text: "Nghe – Part 1: thông báo và tin nhắn ngắn" }),
-    el("p", { class: "lede", text: "Mỗi câu có 3 bước: nghe một lần rồi trả lời như trong phòng thi; nghe lại để điền từ còn thiếu; cuối cùng đọc lời thoại. Giọng đọc là giọng máy của trình duyệt, nên hãy luyện thêm bằng file âm thanh của lớp." })));
+    el("h2", { text: "Nghe – Part 1: thông báo, tin nhắn và hội thoại ngắn" }),
+    el("p", { class: "lede", text: "Tuần 1 luyện thông báo và tin nhắn; tuần 2 luyện hội thoại ngắn, nơi cả 4 phương án thường đều được nhắc tới. Mỗi câu có 3 bước: nghe một lần rồi trả lời như trong phòng thi; nghe lại để điền từ còn thiếu; cuối cùng đọc lời thoại. Giọng đọc là giọng máy của trình duyệt, nên hãy luyện thêm bằng audio của lớp ở cuối trang." })));
   if (!TTS.ok()) root.append(el("p", { class: "note", text: "Trình duyệt này không hỗ trợ đọc văn bản thành giọng nói. Bạn vẫn làm được phần điền từ và đọc lời thoại." }));
 
   const setChips = el("div", { class: "row" });
@@ -941,6 +1127,8 @@ RENDER["nghe"] = function () {
   const key = () => `${set}-${idx}`;
   const segs = t => { const out = []; const re = /\[([^\]]+)\]/g; let last = 0, m; while ((m = re.exec(t))) { if (m.index > last) out.push({ t: t.slice(last, m.index) }); out.push({ b: m[1] }); last = re.lastIndex; } if (last < t.length) out.push({ t: t.slice(last) }); return out; };
   const plain = t => t.replace(/\[([^\]]+)\]/g, "$1");
+  const say = (t, cb) => t.includes("\n") ? TTS.speakLines(plain(t), cb) : TTS.speak(plain(t), cb);
+  const label = t => t.replace(/^M:/gm, "Man:").replace(/^W:/gm, "Woman:");
 
   function drawChips() {
     setChips.replaceChildren(...LISTEN.map((s, i) => el("button", { class: "chip", "aria-pressed": String(i === set), text: s.name, onclick: () => { set = i; idx = 0; TTS.stop(); drawChips(); draw(); } })));
@@ -967,7 +1155,7 @@ RENDER["nghe"] = function () {
     }
     playBtn.addEventListener("click", () => {
       plays[k] = (plays[k] || 0) + 1; wave.classList.add("on"); refreshPlay(); markDay();
-      const ok = TTS.speak(plain(it.text), () => wave.classList.remove("on"));
+      const ok = say(it.text, () => wave.classList.remove("on"));
       if (!ok) wave.classList.remove("on");
     });
     examChk.onchange = refreshPlay;
@@ -977,6 +1165,8 @@ RENDER["nghe"] = function () {
     // step 1: MCQ
     const prev = S.listen[k];
     const fb = el("div");
+    const whyBox = el("div", { class: "stack", style: "gap:6px" });
+    const showWhy = () => { if (it.why) whyBox.replaceChildren(el("h4", { text: "Vì sao chọn / loại từng phương án" }), el("ul", { class: "opt-why" }, it.why.map((w, i) => el("li", { class: i === it.a ? "sel" : "" }, el("b", { text: LETTERS[i] + ". " }), w)))); };
     const optBtns = it.o.map((o, i) => el("button", { class: "opt", type: "button", onclick: () => choose(i) }, el("span", { class: "L", text: LETTERS[i] }), el("span", { text: o })));
     const gapWrap = el("div", { class: "stack", hidden: !prev });
     function lockOpts(chosen) {
@@ -989,9 +1179,9 @@ RENDER["nghe"] = function () {
       S.listen[k] = { mcq: ok, pick: i }; save(); markDay();
       lockOpts(i);
       fb.replaceChildren(el("p", { class: "fb " + (ok ? "ok" : "bad"), text: ok ? "Chính xác." : `Chưa đúng. Đáp án là ${LETTERS[it.a]}.` }));
-      gapWrap.hidden = false; refreshPlay(); drawDots();
+      gapWrap.hidden = false; refreshPlay(); drawDots(); showWhy();
     }
-    if (prev) { lockOpts(prev.pick); fb.replaceChildren(el("p", { class: "fb " + (prev.mcq ? "ok" : "bad"), text: prev.mcq ? "Bạn đã làm đúng câu này." : `Lần trước bạn chọn ${LETTERS[prev.pick]}. Đáp án là ${LETTERS[it.a]}.` })); }
+    if (prev) { lockOpts(prev.pick); showWhy(); fb.replaceChildren(el("p", { class: "fb " + (prev.mcq ? "ok" : "bad"), text: prev.mcq ? "Bạn đã làm đúng câu này." : `Lần trước bạn chọn ${LETTERS[prev.pick]}. Đáp án là ${LETTERS[it.a]}.` })); }
 
     // step 2: gap fill
     const parts = segs(it.text);
@@ -1001,15 +1191,15 @@ RENDER["nghe"] = function () {
     const gapP = el("p", { class: "gap-text" });
     let n = 0;
     parts.forEach(p => {
-      if (p.t) gapP.append(p.t);
+      if (p.t) gapP.append(label(p.t));
       else { n++; const s = el("select", { "aria-label": `Chỗ trống ${n}` }, el("option", { value: "", text: `(${n})` }), bank.map(w => el("option", { value: w, text: w }))); s.dataset.ans = p.b; selects.push(s); gapP.append(s); }
     });
     const gapFb = el("div");
     const transcript = el("p", { class: "transcript" });
-    parts.forEach(p => transcript.append(p.t ? p.t : el("b", { text: p.b })));
+    parts.forEach(p => transcript.append(p.t ? label(p.t) : el("b", { text: p.b })));
     const ts = el("details", {}, el("summary", { text: "Xem lời thoại" }), transcript);
     gapWrap.append(
-      el("div", { class: "row between" }, el("h4", { text: "Bước 2 · Nghe lại và điền từ" }), el("button", { class: "btn", text: "Nghe lại để điền", onclick: () => { wave.classList.add("on"); TTS.speak(plain(it.text), () => wave.classList.remove("on")); } })),
+      el("div", { class: "row between" }, el("h4", { text: "Bước 2 · Nghe lại và điền từ" }), el("button", { class: "btn", text: "Nghe lại để điền", onclick: () => { wave.classList.add("on"); say(it.text, () => wave.classList.remove("on")); } })),
       el("div", { class: "bank" }, bank.map(w => el("span", { text: w }))),
       gapP,
       el("div", { class: "row" }, el("button", { class: "btn primary", text: "Kiểm tra", onclick: () => {
@@ -1023,7 +1213,7 @@ RENDER["nghe"] = function () {
       el("div", { class: "row between" }, el("span", { class: "eyebrow", text: `${LISTEN[set].name} · Câu ${idx + 1}/${LISTEN[set].items.length}` }), el("span", { class: "tag", text: "Part 1" })),
       el("div", { class: "player" }, playBtn, stopBtn, wave, status),
       el("h4", { text: "Bước 1 · " + it.q }),
-      el("div", { class: "opts" }, optBtns), fb,
+      el("div", { class: "opts" }, optBtns), fb, whyBox,
       !prev ? el("button", { class: "btn ghost", style: "align-self:flex-start", text: "Bỏ qua, sang phần điền từ", onclick: e => { gapWrap.hidden = false; e.target.remove(); } }) : null,
       gapWrap,
       el("div", { class: "row between", style: "border-top:1px solid var(--line);padding-top:12px" },
@@ -1032,6 +1222,25 @@ RENDER["nghe"] = function () {
         el("button", { class: "btn primary", text: "Câu sau →", disabled: idx === LISTEN[set].items.length - 1, onclick: () => { idx++; TTS.stop(); draw(); } })));
   }
   drawChips(); draw();
+
+  // tips for week 2 (signal phrases)
+  root.append(el("div", { class: "card stack" }, el("h3", { text: "Mẹo Part 1 (tuần 2): cụm từ báo hiệu" }),
+    el("div", { class: "grid2" }, LISTEN_TIPS.map(t => el("div", { class: "stack", style: "gap:4px" }, el("h4", { text: t.t }), el("p", { class: "small", text: t.d }))))));
+
+  // class audio (local files next to the HTML)
+  const au = el("audio", { controls: true, preload: "none" });
+  const auMsg = el("p", { class: "small muted", text: "Chọn một bài để phát. Câu hỏi và lời thoại nằm trong tài liệu của lớp." });
+  au.addEventListener("error", () => { if (au.getAttribute("src")) auMsg.textContent = "Không mở được file. Hãy giữ các thư mục “Listening Week … audio” cạnh file HTML và mở trang bằng mo-phong-luyen.bat."; });
+  let aw = 0;
+  const auChips = el("div", { class: "row" }), auList = el("div", { class: "audio-list" });
+  function drawAudio() {
+    auChips.replaceChildren(...AUDIO.map((g, i) => el("button", { class: "chip", "aria-pressed": String(i === aw), text: g.name, onclick: () => { aw = i; drawAudio(); } })));
+    auList.replaceChildren(...AUDIO[aw].files.map(f => el("button", { class: "btn ghost small", text: f.label, onclick: () => {
+      TTS.stop(); au.src = encodeURI(f.src); auMsg.textContent = `Đang phát bài ${f.label}`; au.play().catch(() => {}); markDay();
+    } })));
+  }
+  drawAudio();
+  root.append(el("div", { class: "card stack audio-card" }, el("h3", { text: "Audio của lớp" }), auChips, auList, au, auMsg));
 };
 
 /* ---------------- Đọc ---------------- */
@@ -1041,15 +1250,17 @@ RENDER["doc"] = function () {
     TTS.stop();
     root.replaceChildren(
       el("div", { class: "sec-head" }, el("h2", { text: "Đọc – luyện theo dạng câu hỏi" }),
-        el("p", { class: "lede", text: "Bốn bài đầu luyện riêng từng kỹ năng của tuần 1. Hai bài cuối dài hơn, trộn nhiều dạng câu hỏi, gần với Part 2–3 của đề thật. Mục tiêu: khoảng 60% số câu đúng." })),
-      el("div", { class: "plist" }, PASSAGES.map(p => {
-        const r = S.read[p.id];
-        return el("button", { class: "pitem", onclick: () => open(p) },
-          el("div", { class: "row between" }, el("span", { class: "tag", text: p.type }), el("span", { class: "best", text: r ? `Tốt nhất ${r.best}/${p.qs.length}` : "Chưa làm" })),
-          el("b", { text: p.title }), el("span", { class: "small muted", text: `${p.qs.length} câu hỏi` }));
-      })),
-      el("div", { class: "card stack" }, el("h3", { text: "Mẹo theo dạng câu hỏi" }),
-        el("div", { class: "grid2" }, READ_TIPS.map(t => el("div", { class: "stack", style: "gap:4px" }, el("h4", { text: t.t }), el("p", { class: "small", text: t.d }))))));
+        el("p", { class: "lede", text: "Tuần 1: câu hỏi từ vựng, tham chiếu, chi tiết, skimming và scanning. Tuần 2: ý chính, mục đích, suy luận, diễn đạt lại, chèn câu và các dạng khác (ngữ cảnh, giọng điệu, cách tổ chức). Bài “Tổng hợp” dài hơn, gần với đề thật. Mục tiêu: khoảng 60% số câu đúng." })),
+      ...[1, 2].flatMap(w => [
+        el("h3", { class: "wk-h", text: `Tuần ${w}` }),
+        el("div", { class: "plist" }, PASSAGES.filter(p => (p.week || 1) === w).map(p => {
+          const r = S.read[p.id];
+          return el("button", { class: "pitem", onclick: () => open(p) },
+            el("div", { class: "row between" }, el("span", { class: "tag", text: p.type }), el("span", { class: "best", text: r ? `Tốt nhất ${r.best}/${p.qs.length}` : "Chưa làm" })),
+            el("b", { text: p.title }), el("span", { class: "small muted", text: `${p.qs.length} câu hỏi` }));
+        }))]),
+      ...[1, 2].map(w => el("div", { class: "card stack" }, el("h3", { text: `Mẹo theo dạng câu hỏi · tuần ${w}` }),
+        el("div", { class: "grid2" }, READ_TIPS.filter(t => (t.week || 1) === w).map(t => el("div", { class: "stack", style: "gap:4px" }, el("h4", { text: t.t }), el("p", { class: "small", text: t.d })))))));
   }
   function open(p) {
     window.scrollTo(0, 0);
@@ -1241,7 +1452,7 @@ RENDER["tu-vung"] = function () {
   const rangeBar = el("div", { class: "card stack", style: "padding:12px 14px;gap:10px" });
   const body = el("div", { class: "stack" });
   root.append(el("div", { class: "sec-head" }, el("h2", { text: "Từ vựng" }),
-    el("p", { class: "lede", text: "Hai bộ đầu lấy từ danh sách từ trong tài liệu tuần 1 của trung tâm. Các bộ còn lại là chủ đề hay gặp trong phần Viết và Nói. Mỗi ngày chọn một nhóm nhỏ để học, thẻ trong nhóm được trộn ngẫu nhiên." })),
+    el("p", { class: "lede", text: "Bốn bộ đầu lấy từ danh sách từ trong tài liệu tuần 1 và tuần 2 của trung tâm. Các bộ còn lại là chủ đề hay gặp trong phần Viết và Nói. Mỗi ngày chọn một nhóm nhỏ để học, thẻ trong nhóm được trộn ngẫu nhiên." })),
     deckChips, rangeBar, modeChips, body);
   function getRange() {
     const n = VOCAB[deck].length, r = (S.ranges || {})[deck];
